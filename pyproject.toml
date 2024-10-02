@@ -1,0 +1,30 @@
+[project]
+name = "gswa-rdf-delta-consumer"
+version = "0.1.0"
+description = "GSWA's Azure Service Bus RDF Delta Consumer (subscription)."
+authors = [
+    {name = "Edmond Chuc", email = "edmond@kurrawong.ai"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "loguru>=0.7.2",
+    "rdflib>=7.0.0",
+    "pydantic-settings>=2.5.2",
+    "azure-servicebus>=7.12.3",
+    "aiohttp>=3.10.8",
+    "jinja2>=3.1.4",
+    "rdf-delta",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = [
+    "ruff>=0.6.8",
+]
+
+[tool.uv.sources]
+rdf-delta = { url = "https://github.com/Kurrawong/rdf-delta-python/archive/refs/tags/0.2.1.zip" }
