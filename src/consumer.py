@@ -32,17 +32,26 @@ async def main():
                 try:
                     logger.debug("Renewing session lock.")
                     await receiver.session.renew_lock()
-                    messages = await receiver.receive_messages(
-                        max_message_count=MAX_MESSAGE_COUNT, max_wait_time=MAX_WAIT_TIME
+                    logger.debug("Session lock renewed. Waiting for messages.")
+                    messages = await asyncio.wait_for(
+                        receiver.receive_messages(
+                            max_message_count=MAX_MESSAGE_COUNT, max_wait_time=MAX_WAIT_TIME
+                        ),
+                        timeout=MAX_WAIT_TIME + 5  # Add a small buffer to the timeout
                     )
+                    logger.debug(f"{len(messages)} messages received.")
                     for message in messages:
-                        logger.info(f"Processing message id {message.message_id}")
+                        logger.info(f"Processing message with ID {message.message_id}")
                         await process_message(
                             message, receiver, settings.topic, settings.session_id
                         )
+                        logger.info(f"Message processed successfully. Message ID {message.message_id}")
+                except asyncio.TimeoutError:
+                    logger.debug("Timeout occurred while receiving messages.")
                 except SessionLockLostError:
-                    logger.error("Session lock lost, renewing lock.")
+                    logger.debug("Session lock lost, renewing lock.")
                     await receiver.session.renew_lock()
+                    logger.debug("Lost session lock renewed.")
                 except Exception as err:
                     logger.error(f"An unexpected error occurred: {err}")
 
