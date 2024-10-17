@@ -11,6 +11,7 @@ from gswa_rdf_delta_consumer.settings import settings
 
 MAX_MESSAGE_COUNT = 1
 MAX_WAIT_TIME = 5
+TIMEOUT = 10.0
 
 
 async def main():
@@ -31,7 +32,7 @@ async def main():
             while True:
                 try:
                     logger.debug("Renewing session lock.")
-                    await receiver.session.renew_lock()
+                    await receiver.session.renew_lock(timeout=TIMEOUT)
                     logger.debug("Session lock renewed. Waiting for messages.")
                     messages = await asyncio.wait_for(
                         receiver.receive_messages(
