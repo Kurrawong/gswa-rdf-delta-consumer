@@ -24,6 +24,7 @@ async def main():
             topic_name=settings.topic,
             subscription_name=settings.subscription,
             session_id=settings.session_id,
+            max_wait_time=TIMEOUT,
         )
         logger.info(
             f"Connected to subscription {settings.subscription} and awaiting messages on topic {settings.topic}"
@@ -50,9 +51,7 @@ async def main():
                 except asyncio.TimeoutError:
                     logger.debug("Timeout occurred while receiving messages.")
                 except SessionLockLostError:
-                    logger.debug("Session lock lost, renewing lock.")
-                    await receiver.session.renew_lock()
-                    logger.debug("Lost session lock renewed.")
+                    logger.debug("Session lock lost")
                 except Exception as err:
                     logger.error(f"An unexpected error occurred: {err}")
 
