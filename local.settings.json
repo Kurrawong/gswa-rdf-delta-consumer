@@ -1,0 +1,12 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "SERVICE_BUS": "",
+    "SUBSCRIPTION_NAME": "",
+    "TOPIC_NAME": "",
+    "SESSION_ID": "",
+    "RDF_DELTA_URL": "",
+    "RDF_DELTA_DATASOURCE": ""
+  },
+  "ConnectionStrings": {}
+}
