@@ -5,22 +5,34 @@ This function consumes from a "sessionful" service bus topic, processes a messag
 
 In a future iteration, it will integrate with Olis and do some message processing before sending it off to the target services.
 
-This repository should be deployed as a containerized azure function app.
+This repository should be deployed as an azure function app.
 
 > [!NOTE]
 > The function_app.py script contains the code from https://github.com/Kurrawong/rdf-delta-python/
 > because that package has a dependency on python 3.12 but function apps only support up
 > to 3.11. It may be better in the future to modify the dependency of rdf-delta-python
-> to allow 3.11, I have tested locally and it works fine. And then the package can be
-> pip installed instead of duplicating its code here.
+> to allow 3.11, and then the package can be pip installed instead of duplicating its code here.
+> I have tested locally and it works fine. Not a huge issue as it is only a small amount
+> of code.
 
 ## Deployment
 
-1. Build the docker image
-2. push to ACR
-3. create a function app with container image source and use the pushed image.
-4. set the environment variables as below
-5. restart the app
+Deployment can be done from the command line using the
+[azure-functions-core-tools](https://github.com/Azure/azure-functions-core-tools) library.
+
+To deploy you need to have created a function app and then run the following command:
+
+```bash
+func azure functionapp fetch-app-settings <app_name>
+func azure functionapp publish <app_name>
+```
+
+After deployment you then need to set the below configuration options and restart the
+app.
+
+### Configuration
+
+The following environment variables need to be set on the azure function app.
 
 | variable             | example value                              | description                                                                                                                   |
 | -------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -33,5 +45,13 @@ This repository should be deployed as a containerized azure function app.
 
 ## Local Development
 
-You can run the generated docker image locally, with the above environment variables set
-for testing.
+You can run the app locally by calling
+
+```bash
+func start
+```
+
+### Local configuration
+
+Refer to [this article](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=linux%2Cisolated-process%2Cnode-v4%2Cpython-v2%2Chttp-trigger%2Ccontainer-apps&pivots=programming-language-python#local-settings)
+for information about configuring local app settings.
