@@ -11,8 +11,6 @@ from rdflib import Dataset, Graph
 
 app = func.FunctionApp()
 
-subscription_name = os.environ["SUBSCRIPTION_NAME"]
-topic_name = os.environ["TOPIC_NAME"]
 session_name = os.environ["SESSION_ID"]
 rdf_delta_url = os.environ["RDF_DELTA_URL"]
 rdf_delta_datasource = os.environ["RDF_DELTA_DATASOURCE"]
