@@ -2,6 +2,7 @@ import logging
 import os
 from textwrap import dedent
 from uuid import uuid4
+from functools import wraps
 
 import azure.functions as func
 import httpx
@@ -235,13 +236,24 @@ def add_patch_log_header(patch_log: str):
     return patch_log
 
 
-@app.service_bus_topic_trigger(
-    arg_name="message",
-    subscription_name="rdf-patch-consumer",
-    topic_name="rdf-patch-log",
-    connection="SERVICE_BUS",
-    is_sessions_enabled=True,
-)
+def service_bus_topic_trigger(func_app):
+    def decorator(handler):
+        @wraps(handler)
+        def wrapper(*args, **kwargs):
+            return handler(*args, **kwargs)
+
+        return func_app.service_bus_topic_trigger(
+            arg_name="message",
+            subscription_name=os.environ["SERVICE_BUS_SUBSCRIPTION"],
+            topic_name=os.environ["SERVICE_BUS_TOPIC"],
+            connection="SERVICE_BUS",
+            is_sessions_enabled=True,
+        )(wrapper)
+
+    return decorator
+
+
+@service_bus_topic_trigger(app)
 def servicebus_topic_trigger(message: func.ServiceBusMessage):
     logging.info(
         dedent(

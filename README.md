@@ -45,13 +45,35 @@ The following environment variables need to be set on the azure function app.
 
 ## Local Development
 
-You can run the app locally by calling
+### Setting Up
+
+Create a local.settings.json file and copy the example data into it.
+
+```json
+{
+  "IsEncrypted": false,
+  "Values": {
+    "SERVICE_BUS": "",
+    "SERVICE_BUS_SUBSCRIPTION": "rdf-patch-consumer",
+    "SERVICE_BUS_TOPIC": "rdf-patch-log",
+    "SESSION_ID": "main",
+    "RDF_DELTA_URL": "http://localhost:9999",
+    "RDF_DELTA_DATASOURCE": "ds",
+    "FUNCTIONS_WORKER_RUNTIME": "python"
+  },
+  "ConnectionStrings": {}
+}
+```
+
+Populate the `SERVICE_BUS` value with the connection string for service bus. Update the other values as needed.
+
+For more information, refer to [this article](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=linux%2Cisolated-process%2Cnode-v4%2Cpython-v2%2Chttp-trigger%2Ccontainer-apps&pivots=programming-language-python#local-settings)
+for information about configuring local app settings.
+
+### Running
+
+Start the local function app.
 
 ```bash
 func start
 ```
-
-### Local configuration
-
-Refer to [this article](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=linux%2Cisolated-process%2Cnode-v4%2Cpython-v2%2Chttp-trigger%2Ccontainer-apps&pivots=programming-language-python#local-settings)
-for information about configuring local app settings.
