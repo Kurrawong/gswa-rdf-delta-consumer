@@ -1,0 +1,22 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  default:
+    cmd: task -a
+
+  install:
+    desc: Set up the venv and install python dependencies
+    vars:
+      PYTHON_VERSION:
+        sh: cat .python-version | tr -d '\n'
+    cmds:
+      - uv venv -p {{.PYTHON_VERSION}}
+      - uv pip install -r requirements.txt
+
+  code:
+    desc: Run the code linting and formatting
+    cmds:
+      - uv tool run ruff format
+      - uv tool run ruff check --fix
