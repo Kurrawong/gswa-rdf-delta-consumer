@@ -6,12 +6,19 @@ tasks:
   default:
     cmd: task -a
 
+  clean:
+    desc: Clean the venv
+    cmds:
+      - rm -rf .venv
+    ignore_error: true
+
   install:
     desc: Set up the venv and install python dependencies
     vars:
       PYTHON_VERSION:
         sh: cat .python-version | tr -d '\n'
     cmds:
+      - task: clean
       - uv venv -p {{.PYTHON_VERSION}}
       - uv pip install -r requirements.txt
 
@@ -20,3 +27,8 @@ tasks:
     cmds:
       - uv tool run ruff format
       - uv tool run ruff check --fix
+
+  dev:
+    desc: Run in dev mode
+    cmds:
+      - uv run func start

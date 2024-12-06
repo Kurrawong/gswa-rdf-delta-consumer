@@ -50,8 +50,8 @@ Create a local.settings.json file and copy the example data into it.
   "IsEncrypted": false,
   "Values": {
     "SERVICE_BUS": "",
-    "SERVICE_BUS_SUBSCRIPTION": "rdf-patch-consumer",
-    "SERVICE_BUS_TOPIC": "rdf-patch-log",
+    "SERVICE_BUS_SUBSCRIPTION": "rdf-delta-consumer-events",
+    "SERVICE_BUS_TOPIC": "rdf-delta-consumer-events",
     "SESSION_ID": "main",
     "RDF_DELTA_URL": "http://localhost:9999",
     "RDF_DELTA_DATASOURCE": "ds",
