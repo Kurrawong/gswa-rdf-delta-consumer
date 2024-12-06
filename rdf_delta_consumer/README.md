@@ -7,13 +7,9 @@ In a future iteration, it will integrate with Olis and do some message processin
 
 This repository should be deployed as an azure function app.
 
-> [!NOTE]
-> The function_app.py script contains the code from https://github.com/Kurrawong/rdf-delta-python/
-> because that package has a dependency on python 3.12 but function apps only support up
-> to 3.11. It may be better in the future to modify the dependency of rdf-delta-python
-> to allow 3.11, and then the package can be pip installed instead of duplicating its code here.
-> I have tested locally and it works fine. Not a huge issue as it is only a small amount
-> of code.
+## Setting up the topic
+
+Create a new topic `rdf-delta-consumer-events`. No need to check any additional settings. Message ordering is enforced by using sessions in the consumer (subscriber).
 
 ## Deployment
 
