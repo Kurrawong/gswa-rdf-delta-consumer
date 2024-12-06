@@ -1,13 +1,13 @@
 import logging
 import os
+from functools import wraps
 from textwrap import dedent
 from uuid import uuid4
-from functools import wraps
 
 import azure.functions as func
 from jinja2 import Template
-from rdflib import Dataset, Graph
 from rdf_delta import DeltaClient
+from rdflib import Dataset, Graph
 
 app = func.FunctionApp()
 
