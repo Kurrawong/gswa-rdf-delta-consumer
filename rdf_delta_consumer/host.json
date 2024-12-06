@@ -1,5 +1,11 @@
 {
   "version": "2.0",
+  "extensions": {
+    "serviceBus": {
+      "maxConcurrentCalls": 1,
+      "maxConcurrentSessions": 1
+    }
+  },
   "logging": {
     "applicationInsights": {
       "samplingSettings": {
