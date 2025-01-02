@@ -1,0 +1,38 @@
+[project]
+name = "event-persistence-consumer"
+version = "0.1.0"
+description = "A service bus consumer that consumes events from the `rdf-delta` topic and persists them in the SQL Managed Instance event store."
+authors = [
+    { name = "Edmond Chuc", email = "edmond@kurrawong.ai" }
+]
+readme = "README.md"
+
+requires-python = "==3.11.9"
+
+dependencies = [
+    "aiohttp>=3.11.10",
+    "azure-functions==1.21.3",
+    "azure-servicebus>=7.13.0",
+    "pydantic-settings==2.6.1",
+    "pyodbc==5.2.0",
+    "rdflib>=7.1.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.4,<9.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff.lint]
+extend-select = ["I"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+log_cli = true
+log_cli_level = "DEBUG"
+log_cli_format = "%(asctime)s %(levelname)s %(message)s"
+addopts = "-s"

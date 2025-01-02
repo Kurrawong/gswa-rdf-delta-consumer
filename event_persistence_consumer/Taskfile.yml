@@ -19,8 +19,7 @@ tasks:
         sh: cat .python-version | tr -d '\n'
     cmds:
       - task: clean
-      - uv venv -p {{.PYTHON_VERSION}}
-      - uv pip install -r requirements.txt
+      - uv sync
 
   code:
     desc: Run the code linting and formatting
@@ -32,3 +31,7 @@ tasks:
     desc: Run in dev mode
     cmds:
       - uv run func start
+
+  test:
+    desc: Run the tests
+    cmd: uv run pytest

@@ -1,0 +1,14 @@
+# https://taskfile.dev
+
+version: '3'
+
+includes:
+  epc:
+    taskfile: event_persistence_consumer/Taskfile.yml
+  rdc:
+    taskfile: rdf_delta_consumer/Taskfile.yml
+
+tasks:
+  default:
+    desc: Shows this description.
+    cmd: task -a
