@@ -1,6 +1,7 @@
 import pytest
 
 from event_persistence_consumer.database import (
+    Database,
     EventTable,
     create_database_if_not_exists,
     get_databases,
@@ -69,3 +70,14 @@ def test_event_table_get_unpublished_events(database):
 
     table.mark_as_published(1)
     assert len(table.get_unpublished_events()) == 2
+
+
+def test_database_context_manager():
+    with Database(
+        settings.mssql_server,
+        settings.mssql_database,
+        settings.mssql_master_database,
+        settings.mssql_username,
+        settings.mssql_password,
+    ) as db:
+        assert db.connection is not None

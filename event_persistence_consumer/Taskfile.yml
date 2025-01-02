@@ -28,7 +28,7 @@ tasks:
       - uv tool run ruff check --fix
 
   dev:
-    desc: Run in dev mode
+    desc: Run the function app in dev mode
     cmds:
       - uv run func start
 

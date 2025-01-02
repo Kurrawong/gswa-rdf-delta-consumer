@@ -1,6 +1,6 @@
 import json
 import logging
-from contextlib import contextmanager
+from contextlib import ContextDecorator, contextmanager
 from typing import Iterator
 
 import pyodbc
@@ -173,7 +173,7 @@ class EventTable:
             ]
 
 
-class Database:
+class Database(ContextDecorator):
     """A MS SQL Server database abstraction over a connection.
 
     On instantiation, it will use the master connection to create the db if
@@ -197,6 +197,11 @@ class Database:
 
         self.connection = get_connection(server, database, username, password)
 
+    def __enter__(self) -> "Database":
+        return self
+
+    def __exit__(self, *exc) -> None:
+        self.close()
+
     def close(self) -> None:
         self.connection.close()
-        logger.debug(f"Closed connection to {self.database}")
