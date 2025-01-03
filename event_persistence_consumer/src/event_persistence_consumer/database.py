@@ -103,12 +103,43 @@ def create_event_table_if_not_exists(connection: pyodbc.Connection) -> None:
         """)
 
 
+def enable_database_change_tracking(
+    connection: pyodbc.Connection, database: str, retention_in_days: int = 2
+) -> None:
+    """Enable change tracking on the database."""
+    with connection.cursor() as cursor:
+        connection.autocommit = True
+        cursor.execute(f"""
+            IF NOT EXISTS (SELECT * FROM sys.change_tracking_databases WHERE database_id = DB_ID('{database}'))
+            BEGIN
+                ALTER DATABASE {database}
+                SET CHANGE_TRACKING = ON
+                (CHANGE_RETENTION = {retention_in_days} DAYS, AUTO_CLEANUP = ON)
+            END
+        """)
+        connection.autocommit = False
+
+
+def enable_table_change_tracking(connection: pyodbc.Connection, table: str) -> None:
+    """Enable change tracking on the table."""
+    with connection.cursor() as cursor:
+        cursor.execute(f"""
+            IF NOT EXISTS (SELECT * FROM sys.change_tracking_tables WHERE object_id = OBJECT_ID('{table}'))
+            BEGIN
+                ALTER TABLE {table}
+                ENABLE CHANGE_TRACKING
+                WITH (TRACK_COLUMNS_UPDATED = ON)
+            END
+        """)
+
+
 class EventTable:
     """The event table over a db connection."""
 
     def __init__(self, connection: pyodbc.Connection) -> None:
         self.connection = connection
         create_event_table_if_not_exists(self.connection)
+        enable_table_change_tracking(self.connection, "Event")
 
     def insert(self, header: dict, body: str) -> None:
         with self.connection.cursor() as cursor:
@@ -157,6 +188,14 @@ class EventTable:
                 event_id,
             )
 
+    def mark_as_unpublished(self, from_event_id: int) -> None:
+        """Mark all events with an EventID greater than the given event ID as unpublished."""
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                "UPDATE Event SET EventPublished = 'FALSE' WHERE EventID > ?",
+                from_event_id,
+            )
+
     def get_unpublished_events(self) -> list[tuple[int, dict, str]]:
         """Get a list of all unpublished events sorted by EventID."""
         with self.connection.cursor() as cursor:
@@ -177,7 +216,7 @@ class Database(ContextDecorator):
     """A MS SQL Server database abstraction over a connection.
 
     On instantiation, it will use the master connection to create the db if
-    it does not exist.
+    it does not exist. It will also enable change tracking on the database.
     """
 
     def __init__(
@@ -194,6 +233,7 @@ class Database(ContextDecorator):
             server, master_database, username, password
         ) as master_connection:
             create_database_if_not_exists(master_connection, database)
+            enable_database_change_tracking(master_connection, database)
 
         self.connection = get_connection(server, database, username, password)
 

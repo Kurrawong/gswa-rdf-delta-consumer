@@ -81,3 +81,23 @@ def test_database_context_manager():
         settings.mssql_password,
     ) as db:
         assert db.connection is not None
+
+
+def test_enable_database_change_tracking(database):
+    with database.connection.cursor() as cursor:
+        cursor.execute(
+            f"SELECT * FROM sys.change_tracking_databases WHERE database_id = DB_ID('{settings.mssql_database}')"
+        )
+        result = cursor.fetchone()
+        assert result is not None
+
+
+def test_enable_table_change_tracking(database):
+    # Create the event table, which enables change tracking in the constructor.
+    EventTable(database.connection)
+    with database.connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT * FROM sys.change_tracking_tables WHERE object_id = OBJECT_ID('Event')"
+        )
+        result = cursor.fetchone()
+        assert result is not None
