@@ -46,20 +46,21 @@ async def event_trigger(event: str) -> None:
         table = EventTable(db.connection)
 
         async with Client(
-            conn_str=settings.conn_str,
-            topic=settings.topic,
+            conn_str=settings.service_bus,
+            topic=settings.topic_name,
             ws=settings.ws,
         ) as client:
             for row in rows:
                 event_published = row["Item"]["EventPublished"]
                 if event_published:
-                    logging.info(f"Event {row['Item']['EventID']} already published")
+                    logging.info(
+                        f"Event {row['Item']['EventID']} already published")
                 else:
                     logging.info(f"Publishing event {row['Item']['EventID']}")
                     metadata = json.loads(row["Item"]["EventHeader"])
                     logging.info(metadata)
                     await client.send_message(
-                        session_id=settings.session,
+                        session_id=settings.session_id,
                         message=row["Item"]["EventBody"],
                         metadata=metadata,
                     )

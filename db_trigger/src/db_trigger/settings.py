@@ -8,9 +8,9 @@ class Settings(BaseSettings):
         env_prefix="app__", env_file=env_file, env_file_encoding="utf-8", extra="allow"
     )
 
-    conn_str: str
-    topic: str
-    session: str
+    service_bus: str
+    topic_name: str
+    session_id: str
     ws: bool = True
 
 
