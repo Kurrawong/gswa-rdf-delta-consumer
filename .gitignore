@@ -1,7 +1,7 @@
 local.settings.json
 
-# Created by https://www.toptal.com/developers/gitignore/api/python,database,macos,windows,linux
-# Edit at https://www.toptal.com/developers/gitignore?templates=python,database,macos,windows,linux
+# Created by https://www.toptal.com/developers/gitignore/api/linux,macos,python,windows,database
+# Edit at https://www.toptal.com/developers/gitignore?templates=linux,macos,python,windows,database
 
 ### Database ###
 *.accdb
@@ -259,4 +259,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# End of https://www.toptal.com/developers/gitignore/api/python,database,macos,windows,linux
+# End of https://www.toptal.com/developers/gitignore/api/linux,macos,python,windows,database

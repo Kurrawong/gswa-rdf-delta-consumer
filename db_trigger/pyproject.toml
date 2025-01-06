@@ -1,0 +1,31 @@
+[project]
+name = "db_trigger"
+version = "0.1.0"
+description = "An Azure SQL database function trigger that publishes events to a service bus topic."
+authors = [
+    { name = "Edmond Chuc", email = "edmond@kurrawong.ai" }
+]
+readme = "README.md"
+requires-python = "==3.11.9"
+dependencies = [
+    "azure-functions>=1.21.3",
+    "event-persistence-consumer",
+    "pyodbc>=5.2.0",
+]
+
+[tool.ruff.lint]
+extend-select = ["I"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+log_cli = true
+log_cli_level = "DEBUG"
+log_cli_format = "%(asctime)s %(levelname)s %(message)s"
+addopts = "-s"
+
+[tool.uv.sources]
+event-persistence-consumer = { path = "../event_persistence_consumer", editable = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

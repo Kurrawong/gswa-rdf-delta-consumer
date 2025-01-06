@@ -1,79 +1,76 @@
-# GSWA RDF Delta Consumer
+# GSWA RDF Delta Services
 
-This function consumes from a "sessionful" service bus topic, processes a message
-(RDF, RDF Patch Log or SPARQL Update queries) and sends it to the RDF Delta Server or Fuseki SPARQL Update endpoint.
+This repository contains several microservices that make up the GSWA RDF Delta Services.
 
-In a future iteration, it will integrate with Olis and do some message processing before sending it off to the target services.
+## Services Overview
 
-This repository should be deployed as an azure function app.
+### Event Persistence Consumer
 
-> [!NOTE]
-> The function_app.py script contains the code from https://github.com/Kurrawong/rdf-delta-python/
-> because that package has a dependency on python 3.12 but function apps only support up
-> to 3.11. It may be better in the future to modify the dependency of rdf-delta-python
-> to allow 3.11, and then the package can be pip installed instead of duplicating its code here.
-> I have tested locally and it works fine. Not a huge issue as it is only a small amount
-> of code.
+Source code: [event_persistence_consumer](event_persistence_consumer)
 
-## Deployment
+A function app service bus consumer.
 
-Deployment can be done from the command line using the
-[azure-functions-core-tools](https://github.com/Azure/azure-functions-core-tools) library.
+The consumer consumes events from the `rdf-delta` topic and persists them in the event store in SQL Managed Instance. The service bus subscription is named `event-persistence-consumer`.
 
-To deploy you need to have created a function app and then run the following command:
+### SQL Database Trigger
 
-```bash
-func azure functionapp fetch-app-settings <app_name>
-func azure functionapp publish <app_name>
-```
+Source code: [sql_database_trigger](sql_database_trigger)
 
-After deployment you then need to set the below configuration options and restart the
-app.
+A SQL database function trigger. The function runs when updates are made to the `Event` table in the `rdf_delta` database.
 
-### Configuration
+If the `EventPublished` column is set to `FALSE`, the function will publish the event to the `rdf-delta-events` topic in service bus.
 
-The following environment variables need to be set on the azure function app.
+### RDF Delta Consumer
 
-| variable             | example value                              | description                                                                                                                   |
-| -------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| SERVICE_BUS          | Endpoint=sb.//...                          | service bus connection string                                                                                                 |
-| TOPIC_NAME           | my-topic                                   | name of service bus topic                                                                                                     |
-| SUBSCRIPTION_NAME    | my-sub                                     | name of service bus subscription                                                                                              |
-| SESSION_ID           | main                                       | service bus session identifier. needs to be the same value as set <br> in the `SHUI_SERVICE_BUS__SESSION_ID` variable in #137 |
-| RDF_DELTA_URL        | https://myrdfdeltaserver.azurewebsites.net | url for rdf delta server                                                                                                      |
-| RDF_DELTA_DATASOURCE | myds                                       | datasource name to submit patch logs to in rdf delta server                                                                   |
+Source code: [rdf_delta_consumer](rdf_delta_consumer)
+
+A function app service bus consumer.
+
+The consumer consumes events from the `rdf-delta-events` topic, processes them, and sends them to the RDF Delta Server or Fuseki SPARQL Update endpoint.
 
 ## Local Development
 
-### Setting Up
+The recommended way to do development is to use (VS Code with the Dev Container extension)[https://code.visualstudio.com/docs/devcontainers/containers].
 
-Create a local.settings.json file and copy the example data into it.
+Before doing anything, first create a `.env` file in the `.devcontainer` directory. Copy the contents of the `.env-template` file into the `.env` file and fill in the values. Note that this same database password needs to be set for any dependent services that connect to the database.
 
-```json
-{
-  "IsEncrypted": false,
-  "Values": {
-    "SERVICE_BUS": "",
-    "SERVICE_BUS_SUBSCRIPTION": "rdf-patch-consumer",
-    "SERVICE_BUS_TOPIC": "rdf-patch-log",
-    "SESSION_ID": "main",
-    "RDF_DELTA_URL": "http://localhost:9999",
-    "RDF_DELTA_DATASOURCE": "ds",
-    "FUNCTIONS_WORKER_RUNTIME": "python"
-  },
-  "ConnectionStrings": {}
-}
+Now, open the project in VS Code and search for "Dev Containers: Rebuild and Reopen in Container" in the Command Palette. This will build the dev container and reopen the project in the container using the docker engine. By using this method, you can ensure your dev environment has all of the necessary dependencies and tools installed to develop with Azure Functions and Azure SQL Managed Instance.
+
+You will now have all of the .NET dependencies required to run a local instance of SQL Server along with go-task and uv for managing python.
+
+Last step before developing, click on the extensions tab to ensure all of the extensions are loaded. Some may say the window needs to be reloaded. Click it to allow it to reload and initialise correctly.
+
+> [!NOTE]
+> A warning from the Azure extension may appear to complain that it has found multiple function apps in the one project. Just ignore this, we are not using any features from the extension for functions.
+
+### Local SQL Server
+
+The local SQL Server is running in a docker container when the dev container starts. An easy way to view the database is to use the `ms-mssql` extension in VS Code. Once installed, you can connect to the local SQL Server by opening the SQL Server view.
+
+Right-clicking on `LocalDev` will allow you to lodge a SQL query to test your connection. Paste the following query in, right-click the file window and click "Execute Query".
+
+```sql
+SELECT name
+FROM sys.tables
 ```
 
-Populate the `SERVICE_BUS` value with the connection string for service bus. Update the other values as needed.
+### sqlcmd
 
-For more information, refer to [this article](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=linux%2Cisolated-process%2Cnode-v4%2Cpython-v2%2Chttp-trigger%2Ccontainer-apps&pivots=programming-language-python#local-settings)
-for information about configuring local app settings.
-
-### Running
-
-Start the local function app.
+Alternatively, you can use the `sqlcmd` command to connect to the local SQL Server.
 
 ```bash
-func start
+sqlcmd -S localhost -U sa -P password
+```
+
+For example, to drop a database.
+
+```sql
+DROP DATABASE rdf_delta;
+GO
+```
+
+Use the `-d` flag to specify the database when connecting using `sqlcmd`.
+
+```bash
+sqlcmd -S localhost -U sa -P password -d rdf_delta
 ```
