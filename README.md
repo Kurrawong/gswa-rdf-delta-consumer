@@ -2,27 +2,27 @@
 
 This repository contains several microservices that make up the GSWA RDF Delta Services.
 
-## Overview
+## Services Overview
 
 ### Event Persistence Consumer
 
-Source code: `event_persistence_consumer`
+Source code: [event_persistence_consumer](event_persistence_consumer)
 
 A function app service bus consumer.
 
-The consumer consumes events from the `rdf-delta` topic and persists them in the event store in SQL Managed Instance.
+The consumer consumes events from the `rdf-delta` topic and persists them in the event store in SQL Managed Instance. The service bus subscription is named `event-persistence-consumer`.
 
-### Orchestrator
+### SQL Database Trigger
 
-Source code: `orchestrator`
+Source code: [sql_database_trigger](sql_database_trigger)
 
-A durable function orchestrator.
+A SQL database function trigger. The function runs when updates are made to the `Event` table in the `rdf_delta` database.
 
-The orchestrator is responsible for publishing new events that arrive in the event store. Its target message broker is service bus and the topic is `rdf-delta-events`.
+If the `EventPublished` column is set to `FALSE`, the function will publish the event to the `rdf-delta-events` topic in service bus.
 
 ### RDF Delta Consumer
 
-Source code: `rdf_delta_consumer`
+Source code: [rdf_delta_consumer](rdf_delta_consumer)
 
 A function app service bus consumer.
 
@@ -32,7 +32,7 @@ The consumer consumes events from the `rdf-delta-events` topic, processes them, 
 
 The recommended way to do development is to use (VS Code with the Dev Container extension)[https://code.visualstudio.com/docs/devcontainers/containers].
 
-Before doing anything, first create a `.env` file in the `.devcontainer` directory. Copy the contents of the `.env-template` file into the `.env` file and fill in the values.
+Before doing anything, first create a `.env` file in the `.devcontainer` directory. Copy the contents of the `.env-template` file into the `.env` file and fill in the values. Note that this same database password needs to be set for any dependent services that connect to the database.
 
 Now, open the project in VS Code and search for "Dev Containers: Rebuild and Reopen in Container" in the Command Palette. This will build the dev container and reopen the project in the container using the docker engine. By using this method, you can ensure your dev environment has all of the necessary dependencies and tools installed to develop with Azure Functions and Azure SQL Managed Instance.
 
@@ -67,4 +67,10 @@ For example, to drop a database.
 ```sql
 DROP DATABASE rdf_delta;
 GO
+```
+
+Use the `-d` flag to specify the database when connecting using `sqlcmd`.
+
+```bash
+sqlcmd -S localhost -U sa -P password -d rdf_delta
 ```
