@@ -49,11 +49,11 @@ Create a local.settings.json file and copy the example data into it.
 {
   "IsEncrypted": false,
   "Values": {
-    "SERVICE_BUS": "",
-    "SERVICE_BUS_SUBSCRIPTION": "rdf-delta-consumer-events",
-    "SERVICE_BUS_TOPIC": "rdf-delta-consumer-events",
+    "SERVICE_BUS": "Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;",
+    "SERVICE_BUS_SUBSCRIPTION": "rdf-delta-consumer",
+    "SERVICE_BUS_TOPIC": "rdf-delta-events",
     "SESSION_ID": "main",
-    "RDF_DELTA_URL": "http://localhost:9999",
+    "RDF_DELTA_URL": "http://rdf-delta-server:1066",
     "RDF_DELTA_DATASOURCE": "ds",
     "FUNCTIONS_WORKER_RUNTIME": "python"
   },

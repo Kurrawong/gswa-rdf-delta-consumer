@@ -31,4 +31,4 @@ tasks:
   dev:
     desc: Run in dev mode
     cmds:
-      - uv run func start
+      - uv run func start -p 7073
