@@ -37,13 +37,19 @@ services:
   db:
     image: mcr.microsoft.com/azure-sql-edge
     platform: linux/amd64
-    restart: unless-stopped
     environment:
       ACCEPT_EULA: Y
     env_file:
       - .env
     # Add "forwardPorts": ["1433"] to **devcontainer.json** to forward MSSQL locally.
     # (Adding the "ports" property to this file will not forward from a Codespace.)
+  
+  storage:
+    image: mcr.microsoft.com/azure-storage/azurite
+    ports:
+      - 10000:10000
+      - 10001:10001
+      - 10002:10002
 
   rdf-delta-server:
     image: ghcr.io/kurrawong/rdf-delta
