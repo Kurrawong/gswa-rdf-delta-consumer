@@ -1,4 +1,4 @@
-# GSWA RDF Delta Consumer
+# Event Persistence Consumer
 
 This function consumes from a "sessionful" service bus topic, processes a message
 (RDF, RDF Patch Log or SPARQL Update queries) and sends it to the RDF Delta Server or Fuseki SPARQL Update endpoint.
@@ -9,7 +9,7 @@ This repository should be deployed as an azure function app.
 
 ## Setting up the topic
 
-Create a new topic `rdf-delta-consumer-events`. No need to check any additional settings. Message ordering is enforced by using sessions in the consumer (subscriber).
+Create a new topic `rdf-delta`. No need to check any additional settings. Message ordering is enforced by using sessions in the consumer (subscriber).
 
 ## Deployment
 
@@ -33,11 +33,11 @@ The following environment variables need to be set on the azure function app.
 | variable             | example value                              | description                                                                                                                   |
 | -------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
 | SERVICE_BUS          | Endpoint=sb.//...                          | service bus connection string                                                                                                 |
-| TOPIC_NAME           | my-topic                                   | name of service bus topic                                                                                                     |
-| SUBSCRIPTION_NAME    | my-sub                                     | name of service bus subscription                                                                                              |
+| TOPIC_NAME           | rdf-delta                                  | name of service bus topic                                                                                                     |
+| SUBSCRIPTION_NAME    | event-persistence-consumer                 | name of service bus subscription                                                                                              |
 | SESSION_ID           | main                                       | service bus session identifier. needs to be the same value as set <br> in the `SHUI_SERVICE_BUS__SESSION_ID` variable in #137 |
 | RDF_DELTA_URL        | https://myrdfdeltaserver.azurewebsites.net | url for rdf delta server                                                                                                      |
-| RDF_DELTA_DATASOURCE | myds                                       | datasource name to submit patch logs to in rdf delta server                                                                   |
+| RDF_DELTA_DATASOURCE | ds                                         | datasource name to submit patch logs to in rdf delta server                                                                   |
 
 ## Local Development
 
@@ -49,11 +49,11 @@ Create a local.settings.json file and copy the example data into it.
 {
   "IsEncrypted": false,
   "Values": {
-    "SERVICE_BUS": "",
-    "SERVICE_BUS_SUBSCRIPTION": "rdf-patch-consumer",
-    "SERVICE_BUS_TOPIC": "rdf-patch-log",
+    "SERVICE_BUS": "Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;",
+    "SERVICE_BUS_SUBSCRIPTION": "event-persistence-consumer",
+    "SERVICE_BUS_TOPIC": "rdf-delta",
     "SESSION_ID": "main",
-    "RDF_DELTA_URL": "http://localhost:9999",
+    "RDF_DELTA_URL": "http://rdf-delta-server:1066",
     "RDF_DELTA_DATASOURCE": "ds",
     "FUNCTIONS_WORKER_RUNTIME": "python"
   },
@@ -65,6 +65,8 @@ Populate the `SERVICE_BUS` value with the connection string for service bus. Upd
 
 For more information, refer to [this article](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=linux%2Cisolated-process%2Cnode-v4%2Cpython-v2%2Chttp-trigger%2Ccontainer-apps&pivots=programming-language-python#local-settings)
 for information about configuring local app settings.
+
+Additionally, also copy the values from `.env-template` into the `.env` file in this directory.
 
 ### Running
 
