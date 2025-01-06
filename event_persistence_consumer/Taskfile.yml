@@ -30,7 +30,7 @@ tasks:
   dev:
     desc: Run the function app in dev mode
     cmds:
-      - uv run func start
+      - uv run func start -p 7072
 
   test:
     desc: Run the tests
