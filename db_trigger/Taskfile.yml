@@ -21,6 +21,10 @@ tasks:
       - task: clean
       - uv sync
 
+  req:
+    desc: Generate the requirements.txt file
+    cmd: uv pip compile pyproject.toml -o requirements.txt
+
   code:
     desc: Run the code linting and formatting
     cmds:
