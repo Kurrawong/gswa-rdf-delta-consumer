@@ -1,18 +1,17 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+import os
+from dataclasses import dataclass
 
-from event_persistence_consumer.env import env_file
+try:
+    from dotenv import load_dotenv
 
-
-class Settings(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_prefix="app__", env_file=env_file, env_file_encoding="utf-8", extra="allow"
-    )
-
-    mssql_database: str
-    mssql_server: str = "localhost,1433"
-    mssql_master_database: str = "master"
-    mssql_username: str = "sa"
-    mssql_password: str
+    load_dotenv()
+except ImportError:
+    pass
 
 
-settings = Settings()
+@dataclass
+class Settings:
+    sql_connection_string: str
+
+
+settings = Settings(sql_connection_string=os.environ["SqlConnectionString"])

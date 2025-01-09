@@ -26,12 +26,10 @@ def get_connection_manager(
 
 
 def get_connection(
-    server: str, database: str, username: str, password: str
+    connection_str: str,
 ) -> pyodbc.Connection:
     """Get a db connection."""
-    connection_string = f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}"
-    connection = pyodbc.connect(connection_string)
-    logger.debug(f"Connected to {database} on {server}")
+    connection = pyodbc.connect(connection_str)
     return connection
 
 
@@ -138,8 +136,6 @@ class EventTable:
 
     def __init__(self, connection: pyodbc.Connection) -> None:
         self.connection = connection
-        create_event_table_if_not_exists(self.connection)
-        enable_table_change_tracking(self.connection, "Event")
 
     def insert(self, header: dict, body: str) -> None:
         with self.connection.cursor() as cursor:
@@ -221,21 +217,9 @@ class Database(ContextDecorator):
 
     def __init__(
         self,
-        server: str,
-        database: str,
-        master_database: str,
-        username: str,
-        password: str,
+        connection_str: str,
     ) -> None:
-        self.database = database
-
-        with get_connection_manager(
-            server, master_database, username, password
-        ) as master_connection:
-            create_database_if_not_exists(master_connection, database)
-            enable_database_change_tracking(master_connection, database)
-
-        self.connection = get_connection(server, database, username, password)
+        self.connection = get_connection(connection_str)
 
     def __enter__(self) -> "Database":
         return self
