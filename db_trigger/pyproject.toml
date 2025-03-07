@@ -7,11 +7,6 @@ authors = [
 ]
 readme = "README.md"
 requires-python = "==3.11.9"
-dependencies = [
-    "azure-functions>=1.21.3",
-    "event-persistence-consumer",
-    "pyodbc>=5.2.0",
-]
 
 [tool.ruff.lint]
 extend-select = ["I"]
@@ -22,9 +17,6 @@ log_cli = true
 log_cli_level = "DEBUG"
 log_cli_format = "%(asctime)s %(levelname)s %(message)s"
 addopts = "-s"
-
-[tool.uv.sources]
-event-persistence-consumer = { path = "../event_persistence_consumer", editable = true }
 
 [build-system]
 requires = ["hatchling"]

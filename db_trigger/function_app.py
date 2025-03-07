@@ -2,10 +2,9 @@ import json
 import logging
 
 import azure.functions as func
-from event_persistence_consumer.database import Database, EventTable
-from event_persistence_consumer.servicebus import Client
-from event_persistence_consumer.settings import settings as event_persistence_settings
 
+from db_trigger.database import Database, EventTable
+from db_trigger.servicebus import Client
 from db_trigger.settings import settings
 
 app = func.FunctionApp()
@@ -39,7 +38,7 @@ async def event_trigger(event: str) -> None:
                     message=row["Item"]["EventBody"],
                     metadata=metadata,
                 )
-                print(event_persistence_settings.sql_connection_string)
-                with Database(event_persistence_settings.sql_connection_string) as db:
+
+                with Database(settings.sql_connection_string) as db:
                     table = EventTable(db.connection)
                     table.mark_as_published(row["Item"]["EventID"])
