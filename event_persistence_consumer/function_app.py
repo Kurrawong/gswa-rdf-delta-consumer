@@ -10,7 +10,7 @@ from event_persistence_consumer.settings import settings
 
 app = func.FunctionApp()
 
-session_name = os.environ["SESSION_ID"]
+session_name = os.environ.get("SESSION_ID", "")
 
 
 def service_bus_topic_trigger(func_app):
@@ -21,8 +21,8 @@ def service_bus_topic_trigger(func_app):
 
         return func_app.service_bus_topic_trigger(
             arg_name="message",
-            subscription_name=os.environ["SERVICE_BUS_SUBSCRIPTION"],
-            topic_name=os.environ["SERVICE_BUS_TOPIC"],
+            subscription_name=os.environ.get("SERVICE_BUS_SUBSCRIPTION", ""),
+            topic_name=os.environ.get("SERVICE_BUS_TOPIC", ""),
             connection="SERVICE_BUS",
             is_sessions_enabled=True,
         )(wrapper)
