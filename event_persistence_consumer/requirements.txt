@@ -1,4 +1,4 @@
--e ./src/event_persistence_consumer
+-e ./event_persistence_consumer
 
 aiohappyeyeballs==2.4.4
     # via aiohttp
