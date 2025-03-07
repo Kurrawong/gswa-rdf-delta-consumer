@@ -8,23 +8,20 @@ tasks:
 
   clean:
     desc: Clean the venv
-    cmds:
-      - rm -rf .venv
-    ignore_error: true
-
-  install:
-    desc: Set up the venv and install python dependencies
     vars:
       PYTHON_VERSION:
         sh: cat .python-version | tr -d '\n'
     cmds:
+      - rm -rf .venv
+      - uv venv -p $PYTHON_VERSION
+    ignore_error: true
+
+  install:
+    desc: Set up the venv and install python dependencies
+    cmds:
       - task: clean
-      - uv sync
-
-  req:
-    desc: Generate the requirements.txt file
-    cmd: uv pip compile pyproject.toml -o requirements.txt
-
+      - uv pip install -r requirements.txt
+      - uv pip install -r requirements-dev.txt
   code:
     desc: Run the code linting and formatting
     cmds:

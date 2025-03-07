@@ -7,22 +7,7 @@ authors = [
 ]
 readme = "README.md"
 
-requires-python = "==3.11.9"
-
-dependencies = [
-    "aiohttp>=3.11.10",
-    "azure-functions==1.21.3",
-    "azure-servicebus>=7.13.0",
-    "pydantic-settings==2.6.1",
-    "pyodbc==5.2.0",
-    "rdflib>=7.1.1",
-]
-
-[dependency-groups]
-dev = [
-    "pytest>=8.3.4,<9.0.0",
-    "python-dotenv>=1.0.1",
-]
+requires-python = "~=3.11"
 
 [build-system]
 requires = ["hatchling"]
