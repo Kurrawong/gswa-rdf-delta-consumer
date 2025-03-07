@@ -9,7 +9,7 @@ This repository should be deployed as an azure function app.
 
 ## Setting up the topic
 
-Create a new topic `rdf-delta-consumer-events`. No need to check any additional settings. Message ordering is enforced by using sessions in the consumer (subscriber).
+Create a new topic `rdf-delta-events`. No need to check any additional settings. Message ordering is enforced by using sessions in the consumer (subscriber).
 
 ## Deployment
 
