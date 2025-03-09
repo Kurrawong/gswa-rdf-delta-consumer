@@ -11,9 +11,9 @@ from rdflib import Dataset, Graph
 
 app = func.FunctionApp()
 
-session_name = os.environ["SESSION_ID"]
-rdf_delta_url = os.environ["RDF_DELTA_URL"]
-rdf_delta_datasource = os.environ["RDF_DELTA_DATASOURCE"]
+session_name = os.environ.get("SESSION_ID", "")
+rdf_delta_url = os.environ.get("RDF_DELTA_URL", "")
+rdf_delta_datasource = os.environ.get("RDF_DELTA_DATASOURCE", "")
 
 
 def convert_rdf_payload_to_rdf_patch(
@@ -76,8 +76,8 @@ def service_bus_topic_trigger(func_app):
 
         return func_app.service_bus_topic_trigger(
             arg_name="message",
-            subscription_name=os.environ["SERVICE_BUS_SUBSCRIPTION"],
-            topic_name=os.environ["SERVICE_BUS_TOPIC"],
+            subscription_name=os.environ.get("SERVICE_BUS_SUBSCRIPTION", ""),
+            topic_name=os.environ.get("SERVICE_BUS_TOPIC", ""),
             connection="SERVICE_BUS",
             is_sessions_enabled=True,
         )(wrapper)

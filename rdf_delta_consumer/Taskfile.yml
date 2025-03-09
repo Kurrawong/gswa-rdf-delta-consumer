@@ -10,25 +10,23 @@ tasks:
     desc: Clean the venv
     cmds:
       - rm -rf .venv
+      - python -m venv .venv
     ignore_error: true
 
   install:
     desc: Set up the venv and install python dependencies
-    vars:
-      PYTHON_VERSION:
-        sh: cat .python-version | tr -d '\n'
     cmds:
       - task: clean
-      - uv venv -p {{.PYTHON_VERSION}}
-      - uv pip install -r requirements.txt
+      - .venv/bin/pip install -r requirements.txt
+      - .venv/bin/pip install -r requirements-dev.txt
 
   code:
     desc: Run the code linting and formatting
     cmds:
-      - uv tool run ruff format
-      - uv tool run ruff check --fix
+      - .venv/bin/ruff format
+      - .venv/bin/ruff check --fix
 
   dev:
     desc: Run in dev mode
     cmds:
-      - uv run func start -p 7073
+      - func start -p 7073

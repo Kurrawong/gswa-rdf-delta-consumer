@@ -10,32 +10,33 @@ tasks:
     desc: Clean the venv
     cmds:
       - rm -rf .venv
+      - python -m venv .venv
     ignore_error: true
 
   install:
     desc: Set up the venv and install python dependencies
-    vars:
-      PYTHON_VERSION:
-        sh: cat .python-version | tr -d '\n'
     cmds:
       - task: clean
-      - uv sync
-
-  req:
-    desc: Generate the requirements.txt file
-    cmd: uv pip compile pyproject.toml -o requirements.txt
+      - .venv/bin/pip install -r requirements.txt
+      - .venv/bin/pip install -r requirements-dev.txt
 
   code:
     desc: Run the code linting and formatting
     cmds:
-      - uv tool run ruff format
-      - uv tool run ruff check --fix
+      - .venv/bin/ruff format
+      - .venv/bin/ruff check --fix
 
   dev:
     desc: Run the function app in dev mode
     cmds:
-      - uv run func start -p 7072
+      - func start -p 7072
 
   test:
     desc: Run the tests
-    cmd: uv run pytest
+    cmd: .venv/bin/pytest
+
+  load:
+    desc: Load the data into the database
+    cmds:
+      - .venv/bin/python sb_producer.py rdf-delta main users.trig
+      - .venv/bin/python sb_producer.py rdf-delta main catalogs.trig
