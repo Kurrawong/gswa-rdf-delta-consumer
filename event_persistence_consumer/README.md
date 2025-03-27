@@ -30,15 +30,15 @@ app.
 
 The following environment variables need to be set on the azure function app.
 
-| variable             | example value                                                                                                                    | description                                                                                                                   |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| SERVICE_BUS          | Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true; | service bus connection string                                                                                                 |
-| TOPIC_NAME           | rdf-delta                                                                                                                        | name of service bus topic                                                                                                     |
-| SUBSCRIPTION_NAME    | event-persistence-consumer                                                                                                       | name of service bus subscription                                                                                              |
-| SESSION_ID           | main                                                                                                                             | service bus session identifier. needs to be the same value as set <br> in the `SHUI_SERVICE_BUS__SESSION_ID` variable in #137 |
-| RDF_DELTA_URL        | https://myrdfdeltaserver.azurewebsites.net                                                                                       | url for rdf delta server                                                                                                      |
-| RDF_DELTA_DATASOURCE | ds                                                                                                                               | datasource name to submit patch logs to in rdf delta server                                                                   |
-| SqlConnectionString  | DRIVER={ODBC Driver 17 for SQL Server};SERVER=db,1433;DATABASE=rdf_delta;UID=sa;PWD=P@ssw0rd!;                                   | connection string for the database                                                                                            |
+| variable                 | example value                                                                                                                    | description                                                                                                                   |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| SERVICE_BUS              | Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true; | service bus connection string                                                                                                 |
+| SERVICE_BUS_TOPIC        | rdf-delta                                                                                                                        | name of service bus topic                                                                                                     |
+| SERVICE_BUS_SUBSCRIPTION | event-persistence-consumer                                                                                                       | name of service bus subscription                                                                                              |
+| SESSION_ID               | main                                                                                                                             | service bus session identifier. needs to be the same value as set <br> in the `SHUI_SERVICE_BUS__SESSION_ID` variable in #137 |
+| RDF_DELTA_URL            | https://myrdfdeltaserver.azurewebsites.net                                                                                       | url for rdf delta server                                                                                                      |
+| RDF_DELTA_DATASOURCE     | ds                                                                                                                               | datasource name to submit patch logs to in rdf delta server                                                                   |
+| SqlConnectionString      | DRIVER={ODBC Driver 17 for SQL Server};SERVER=db,1433;DATABASE=rdf_delta;UID=sa;PWD=P@ssw0rd!;                                   | connection string for the database                                                                                            |
 
 ## Local Development
 
@@ -62,7 +62,6 @@ Create a local.settings.json file and copy the example data into it.
   },
   "ConnectionStrings": {}
 }
-
 ```
 
 Populate the `SERVICE_BUS` value with the connection string for service bus. Update the other values as needed.
