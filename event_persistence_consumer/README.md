@@ -1,77 +1,115 @@
 # Event Persistence Consumer
 
-This function consumes from a "sessionful" service bus topic, processes a message
-(RDF, RDF Patch Log or SPARQL Update queries) and sends it to the RDF Delta Server or Fuseki SPARQL Update endpoint.
+An Azure Function App with a service bus topic trigger.
 
-In a future iteration, it will integrate with Olis and do some message processing before sending it off to the target services.
+This function consumes messages from a "sessionful" service bus topic and
+sends them to an Azure SQL Database for persistant storage.
 
-This repository should be deployed as an azure function app.
+## Pre-requisites
 
-## Setting up the topic
-
-Create a new topic `rdf-delta`. No need to check any additional settings. Message ordering is enforced by using sessions in the consumer (subscriber).
+- an Azure Function app
+- an Azure service bus namespace
+- a service bus topic
+- a sessionful subscription on the topic
 
 ## Deployment
 
 Deployment can be done from the command line using the
 [azure-functions-core-tools](https://github.com/Azure/azure-functions-core-tools) library.
 
-To deploy you need to have created a function app and then run the following command:
-
 ```bash
-func azure functionapp fetch-app-settings <app_name>
 func azure functionapp publish <app_name>
 ```
 
-After deployment you then need to set the below configuration options and restart the
-app.
+Or from a DevOps pipeline using the AzureFunctionApp task. See example pipeline below.
+
+```yaml
+trigger: none
+ 
+variables:
+  functionAppName: 'myfunctionapp'
+  resourceGroupName: 'myresourcegroup'
+  serviceConnection: 'myserviceconnection'
+  workingDirectory: '$(System.DefaultWorkingDirectory)/event_persistence_consumer'
+  myDestinationFolder: '$(System.ArtifactsDirectory)'
+ 
+stages:
+- stage: Build
+  displayName: Build Stage
+ 
+  jobs:
+  - job: Build
+    displayName: Build App
+    pool:
+      vmImage: 'ubuntu-latest'
+ 
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: 3.11
+    - bash: |
+        pip install --target="./.python_packages/lib/site-packages" -r ./requirements.txt
+      workingDirectory: $(workingDirectory)
+      
+    - task: ArchiveFiles@2
+      inputs:
+        includeRootFolder: false
+        rootFolderOrFile: $(workingDirectory)
+        archiveType: zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/eventpercons.zip
+        replaceExistingArchive: true
+ 
+ 
+    - task: PublishBuildArtifacts@1
+
+    - task: DownloadBuildArtifacts@1
+      inputs:
+        artifactName: drop
+
+    - task: AzureFunctionApp@2
+      displayName: Deploy Function App
+      inputs:
+        azureSubscription: ${{ variables.serviceConnection }}
+        appType: functionAppLinux
+        appName: ${{ variables.functionAppName }}
+        package: '$(System.ArtifactsDirectory)/drop/eventpercons.zip'
+        deployToSlotOrASE: true  
+        resourceGroupName: ${{ variables.resourceGroupName }}
+        deploymentMethod: 'zipDeploy'
+```
 
 ### Configuration
 
-The following environment variables need to be set on the azure function app.
+The following environment variables need to be set on the function app.
 
-| variable             | example value                                                                                                                    | description                                                                                                                   |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| SERVICE_BUS          | Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true; | service bus connection string                                                                                                 |
-| TOPIC_NAME           | rdf-delta                                                                                                                        | name of service bus topic                                                                                                     |
-| SUBSCRIPTION_NAME    | event-persistence-consumer                                                                                                       | name of service bus subscription                                                                                              |
-| SESSION_ID           | main                                                                                                                             | service bus session identifier. needs to be the same value as set <br> in the `SHUI_SERVICE_BUS__SESSION_ID` variable in #137 |
-| RDF_DELTA_URL        | https://myrdfdeltaserver.azurewebsites.net                                                                                       | url for rdf delta server                                                                                                      |
-| RDF_DELTA_DATASOURCE | ds                                                                                                                               | datasource name to submit patch logs to in rdf delta server                                                                   |
-| SqlConnectionString  | DRIVER={ODBC Driver 17 for SQL Server};SERVER=db,1433;DATABASE=rdf_delta;UID=sa;PWD=P@ssw0rd!;                                   | connection string for the database                                                                                            |
+| variable                 | example value                                                                                                                    | description                        |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| SERVICE_BUS              | Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true; | service bus connection string      |
+| SERVICE_BUS_TOPIC        | rdf-delta                                                                                                                        | name of service bus topic          |
+| SERVICE_BUS_SUBSCRIPTION | event-persistence-consumer                                                                                                       | name of service bus subscription   |
+| SqlConnectionString      | DRIVER={ODBC Driver 17 for SQL Server};SERVER=db,1433;DATABASE=rdf_delta;UID=sa;PWD=P@ssw0rd!;                                   | connection string for the database |
 
 ## Local Development
 
 ### Setting Up
 
-Create a local.settings.json file and copy the example data into it.
+Set the above environment variables in a local.settings.json like so:
 
 ```json
 {
   "IsEncrypted": false,
   "Values": {
-    "SERVICE_BUS": "Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;",
-    "SERVICE_BUS_SUBSCRIPTION": "event-persistence-consumer",
-    "SERVICE_BUS_TOPIC": "rdf-delta",
-    "SESSION_ID": "main",
-    "RDF_DELTA_URL": "http://rdf-delta-server:1066",
-    "RDF_DELTA_DATASOURCE": "ds",
     "FUNCTIONS_WORKER_RUNTIME": "python"
+    "SERVICE_BUS": "Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;",
+    "SERVICE_BUS_SUBSCRIPTION": "mysubscriptionname",
+    "SERVICE_BUS_TOPIC": "mytopicname",
+    "SqlConnectionString": "DRIVER={ODBC Driver 17 for SQL Server};SERVER=db,1433;DATABASE=rdf_delta;UID=sa;PWD=P@ssw0rd!;"
   },
   "ConnectionStrings": {}
 }
 ```
 
-Populate the `SERVICE_BUS` value with the connection string for service bus. Update the other values as needed.
-
-For more information, refer to [this article](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=linux%2Cisolated-process%2Cnode-v4%2Cpython-v2%2Chttp-trigger%2Ccontainer-apps&pivots=programming-language-python#local-settings)
-for information about configuring local app settings.
-
-Additionally, also copy the values from `.env-template` into the `.env` file in this directory.
-
-### Running
-
-Start the local function app.
+You can then run the app locally with
 
 ```bash
 func start

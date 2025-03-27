@@ -10,8 +10,6 @@ from event_persistence_consumer.settings import settings
 
 app = func.FunctionApp()
 
-session_name = os.environ.get("SESSION_ID", "")
-
 
 def service_bus_topic_trigger(func_app):
     def decorator(handler):
