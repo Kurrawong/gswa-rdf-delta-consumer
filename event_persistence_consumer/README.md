@@ -56,10 +56,13 @@ Create a local.settings.json file and copy the example data into it.
     "SESSION_ID": "main",
     "RDF_DELTA_URL": "http://rdf-delta-server:1066",
     "RDF_DELTA_DATASOURCE": "ds",
-    "FUNCTIONS_WORKER_RUNTIME": "python"
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "SqlConnectionString": "DRIVER={ODBC Driver 17 for SQL Server};SERVER=db,1433;DATABASE=rdf_delta;UID=sa;PWD=P@ssw0rd!;"
   },
   "ConnectionStrings": {}
 }
+
 ```
 
 Populate the `SERVICE_BUS` value with the connection string for service bus. Update the other values as needed.
@@ -67,9 +70,13 @@ Populate the `SERVICE_BUS` value with the connection string for service bus. Upd
 For more information, refer to [this article](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=linux%2Cisolated-process%2Cnode-v4%2Cpython-v2%2Chttp-trigger%2Ccontainer-apps&pivots=programming-language-python#local-settings)
 for information about configuring local app settings.
 
-Additionally, also copy the values from `.env-template` into the `.env` file in this directory.
-
 ### Running
+
+Before starting the function app, initialise the database by running the init.py script.
+
+```bash
+python init.py
+```
 
 Start the local function app.
 
