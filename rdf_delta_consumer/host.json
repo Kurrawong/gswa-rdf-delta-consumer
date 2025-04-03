@@ -3,7 +3,8 @@
   "extensions": {
     "serviceBus": {
       "maxConcurrentCalls": 1,
-      "maxConcurrentSessions": 1
+      "maxConcurrentSessions": 1,
+      "transportType": "amqpWebSockets"
     }
   },
   "logging": {
