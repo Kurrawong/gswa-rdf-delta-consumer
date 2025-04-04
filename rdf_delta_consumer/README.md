@@ -33,8 +33,8 @@ The following environment variables need to be set on the azure function app.
 | variable                 | example value                              | description                                                                                                                   |
 | ------------------------ | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
 | SERVICE_BUS              | Endpoint=sb.//...                          | service bus connection string                                                                                                 |
-| SERVICE_BUS_TOPIC        | my-topic                                   | name of service bus topic                                                                                                     |
-| SERVICE_BUS_SUBSCRIPTION | my-sub                                     | name of service bus subscription                                                                                              |
+| SERVICE_BUS_TOPIC        | rdf-delta-events                           | name of service bus topic                                                                                                     |
+| SERVICE_BUS_SUBSCRIPTION | rdf-delta-events-consumer                  | name of service bus subscription                                                                                              |
 | SESSION_ID               | main                                       | service bus session identifier. needs to be the same value as set <br> in the `SHUI_SERVICE_BUS__SESSION_ID` variable in #137 |
 | RDF_DELTA_URL            | https://myrdfdeltaserver.azurewebsites.net | url for rdf delta server                                                                                                      |
 | RDF_DELTA_DATASOURCE     | myds                                       | datasource name to submit patch logs to in rdf delta server                                                                   |
@@ -50,7 +50,7 @@ Create a local.settings.json file and copy the example data into it.
   "IsEncrypted": false,
   "Values": {
     "SERVICE_BUS": "Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;",
-    "SERVICE_BUS_SUBSCRIPTION": "rdf-delta-consumer",
+    "SERVICE_BUS_SUBSCRIPTION": "rdf-delta-events-consumer",
     "SERVICE_BUS_TOPIC": "rdf-delta-events",
     "SESSION_ID": "main",
     "RDF_DELTA_URL": "http://rdf-delta-server:1066",
