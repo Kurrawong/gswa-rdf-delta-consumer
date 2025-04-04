@@ -25,12 +25,12 @@ app.
 
 The following environment variables need to be set on the azure function app.
 
-| variable                 | example value                                                                                  | description                                                                                 |
-| ------------------------ | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| SERVICE_BUS_TOPIC        | rdf-delta                                                                                      | name of service bus topic                                                                   |
-| SERVICE_BUS_SUBSCRIPTION | event-persistence-consumer                                                                     | name of service bus subscription                                                            |
-| SqlConnectionString      | DRIVER={ODBC Driver 17 for SQL Server};SERVER=db,1433;DATABASE=rdf_delta;UID=sa;PWD=P@ssw0rd!; | connection string for the database - ensure the driver is included in the connection string |
-| FUNCTIONS_WORKER_RUNTIME | python                                                                                         | runtime for the function app                                                                |
+| variable                 | example value                                                                                                                    | description                                                            |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| SERVICE_BUS              | Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true; | service bus connection string                                          |
+| SERVICE_BUS_TOPIC        | rdf-delta                                                                                                                        | name of service bus topic                                              |
+| SERVICE_BUS_SUBSCRIPTION | event-persistence-consumer                                                                                                       | name of service bus subscription                                       |
+| SqlConnectionString      | DRIVER={ODBC Driver 17 for SQL Server};SERVER=db,1433;DATABASE=rdf_delta;UID=sa;PWD=P@ssw0rd!;                                   | connection string for the database - requires the ODBC Driver to be 17 for python 3.10 and 18 for python 3.11 |
 
 ### Running
 
