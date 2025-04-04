@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     topic_name: str = ""
     session_id: str = ""
     ws: bool = True
-    sql_connection_string: str = ""
+    sql_connection_string_odbc: str = ""
 
 
 settings = Settings()
