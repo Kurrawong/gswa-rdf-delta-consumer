@@ -14,4 +14,6 @@ class Settings:
     sql_connection_string: str
 
 
-settings = Settings(sql_connection_string=os.environ.get("SqlConnectionString", ""))
+settings = Settings(
+    sql_connection_string=os.environ.get("SqlConnectionString", ""),
+)

@@ -8,9 +8,8 @@ import azure.functions as func
 from event_persistence_consumer.database import Database, EventTable
 from event_persistence_consumer.settings import settings
 
-app = func.FunctionApp()
 
-session_name = os.environ.get("SESSION_ID", "")
+app = func.FunctionApp()
 
 
 def service_bus_topic_trigger(func_app):
@@ -45,7 +44,8 @@ def servicebus_topic_trigger(message: func.ServiceBusMessage):
         )
     )
     if message.content_type is None:
-        raise ValueError(f"message {message.message_id} missing content-type header")
+        raise ValueError(
+            f"message {message.message_id} missing content-type header")
     try:
         with Database(settings.sql_connection_string) as db:
             table = EventTable(db.connection)
