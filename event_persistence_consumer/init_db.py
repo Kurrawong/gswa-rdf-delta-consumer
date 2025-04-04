@@ -9,7 +9,7 @@ from event_persistence_consumer.database import (
 from event_persistence_consumer.settings import settings
 
 db_name = "rdf_delta"
-master_connection_str = "DRIVER={ODBC Driver 17 for SQL Server};SERVER=db,1433;DATABASE=master;UID=sa;PWD=P@ssw0rd!;"
+master_connection_str = settings.sql_connection_string
 
 connection = get_connection(master_connection_str)
 create_database_if_not_exists(connection, db_name)

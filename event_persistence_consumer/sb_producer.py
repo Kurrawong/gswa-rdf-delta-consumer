@@ -2,13 +2,20 @@ import argparse
 import asyncio
 import datetime
 import logging
+import os
 import pathlib
 
 from rdflib import SDO, Graph, URIRef
+from dotenv import load_dotenv
 
 from event_persistence_consumer.servicebus import Client
 
-conn_str = "Endpoint=sb://sb;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
+try:
+    load_dotenv()
+except ModuleNotFoundError:
+    pass
+
+conn_str = os.getenv("SERVICE_BUS")
 
 SUPPORTED_FORMATS = ["application/rdf-patch", "text/turtle", "application/trig"]
 path = pathlib.Path(__file__).parent.absolute()
