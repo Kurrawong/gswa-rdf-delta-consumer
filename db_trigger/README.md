@@ -19,6 +19,46 @@ The following environment variables need to be set on the azure function app for
 | SqlConnectionString        | Server=tcp:gswa-rdf-delta-events.database.windows.net,1433;Database=rdf-delta;Uid=...;Pwd=...;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;TrustServerCertificate=True;            | connection string for the database used by the function trigger                                                               |
 | SQL_CONNECTION_STRING_ODBC | Driver={ODBC Driver 18 for SQL Server};Server=tcp:gswa-rdf-delta-events.database.windows.net,1433;Database=rdf-delta;Uid=...;Pwd=...;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30; | connection string for the database - requires the ODBC Driver to be 17 for python 3.10 and 18 for python 3.11                 |
 
+### Running
+
+Once the SQL Database has been created, in the Query Editor, run the following.
+
+Enable database change tracking.
+
+```sql
+IF NOT EXISTS (SELECT * FROM sys.change_tracking_databases WHERE database_id = DB_ID('rdf-delta'))
+BEGIN
+    ALTER DATABASE [rdf-delta]
+    SET CHANGE_TRACKING = ON
+    (CHANGE_RETENTION = 2 DAYS, AUTO_CLEANUP = ON)
+END
+```
+
+Create the table.
+
+```sql
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Event')
+BEGIN
+    CREATE TABLE Event (
+        EventID BIGINT IDENTITY(1,1) PRIMARY KEY,
+        EventHeader NVARCHAR(4000),
+        EventBody NVARCHAR(MAX),
+        EventPublished BIT DEFAULT 'FALSE'
+    )
+END
+```
+
+Enable table change tracking.
+
+```sql
+IF NOT EXISTS (SELECT * FROM sys.change_tracking_tables WHERE object_id = OBJECT_ID('Event'))
+BEGIN
+    ALTER TABLE [Event]
+    ENABLE CHANGE_TRACKING
+    WITH (TRACK_COLUMNS_UPDATED = ON)
+END
+```
+
 ## Local Development
 
 ### Local settings
