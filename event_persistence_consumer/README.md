@@ -23,14 +23,14 @@ app.
 
 ### Configuration
 
-The following environment variables need to be set on the azure function app.
+The following environment variables need to be set on the azure function app for python 3.11.
 
-| variable                 | example value                                                                                                                    | description                                                            |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| SERVICE_BUS              | Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true; | service bus connection string                                          |
-| SERVICE_BUS_TOPIC        | rdf-delta                                                                                                                        | name of service bus topic                                              |
-| SERVICE_BUS_SUBSCRIPTION | event-persistence-consumer                                                                                                       | name of service bus subscription                                       |
-| SqlConnectionString      | Driver={ODBC Driver 18 for SQL Server};Server=tcp:gswa-rdf-delta-events.database.windows.net,1433;Database=rdf-delta;Uid=...;Pwd=...;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;                                   | connection string for the database - requires the ODBC Driver to be 17 for python 3.10 and 18 for python 3.11 |
+| variable                 | example value                                                                                                                                                                                     | description                                                                                                   |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| SERVICE_BUS              | Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;                                                                  | service bus connection string                                                                                 |
+| SERVICE_BUS_TOPIC        | rdf-delta                                                                                                                                                                                         | name of service bus topic                                                                                     |
+| SERVICE_BUS_SUBSCRIPTION | event-persistence-consumer                                                                                                                                                                        | name of service bus subscription                                                                              |
+| SqlConnectionString      | Driver={ODBC Driver 18 for SQL Server};Server=tcp:gswa-rdf-delta-events.database.windows.net,1433;Database=rdf-delta;Uid=...;Pwd=...;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30; | connection string for the database - requires the ODBC Driver to be 17 for python 3.10 and 18 for python 3.11 |
 
 ### Running
 
@@ -72,12 +72,6 @@ BEGIN
 END
 ```
 
-Start the local function app.
-
-```bash
-func start
-```
-
 ## Local Development
 
 ### Setting Up
@@ -99,6 +93,12 @@ func start
 
 For more information, refer to [this article](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=linux%2Cisolated-process%2Cnode-v4%2Cpython-v2%2Chttp-trigger%2Ccontainer-apps&pivots=programming-language-python#local-settings)
 for information about configuring local app settings.
+
+### Start the local function app.
+
+```bash
+task dev
+```
 
 ### Local Dev Env Vars
 
