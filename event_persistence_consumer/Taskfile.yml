@@ -40,3 +40,8 @@ tasks:
     cmds:
       - .venv/bin/python sb_producer.py rdf-delta main users.trig --ws
       - .venv/bin/python sb_producer.py rdf-delta main catalogs.trig --ws
+
+  deploy:
+    desc: Deploy the function app to azure
+    cmds:
+      - func azure functionapp publish gswa-epc
