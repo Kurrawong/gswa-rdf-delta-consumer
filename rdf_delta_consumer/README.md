@@ -69,5 +69,11 @@ for information about configuring local app settings.
 Start the local function app.
 
 ```bash
-func start
+task dev
 ```
+
+### Testing
+
+Testing is a hybrid solution where the other function apps and the SQL database are deployed in Azure while the RDF Delta Server and the Fuseki database are tested locally.
+
+To connect from this function app to the local RDF Delta Server, it is necessary to run this function app locally.
