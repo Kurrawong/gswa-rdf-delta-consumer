@@ -4,7 +4,7 @@ This service publishes all rows as events to the `rdf-delta-events` topic in ser
 
 Note that the database function app trigger is not supported on the flex consumption plan. See https://learn.microsoft.com/en-us/azure/azure-functions/flex-consumption-plan#considerations.
 
-This function app has been tested with the App Service plan.
+This function app has been tested with the App Service plan deployed in the Canada Central region. Some configuration settings are not supported in the Australian regions.
 
 ## Configuration
 
