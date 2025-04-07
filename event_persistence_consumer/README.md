@@ -107,3 +107,9 @@ The `.env` file is used to set the environment variables for the local developme
 The `SERVICE_BUS` value is only used by the `sb_producer.py` script.
 
 The `SqlConnectionString` value is used by the `init_db.py` script.
+
+### Deploy test function app to Azure
+
+```bash
+task deploy
+```
