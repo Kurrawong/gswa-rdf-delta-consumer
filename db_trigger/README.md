@@ -42,3 +42,9 @@ The following environment variables need to be set on the azure function app for
 ```
 
 Start the function by running `task dev`.
+
+### Deploy test function app to Azure
+
+```bash
+task deploy
+```
