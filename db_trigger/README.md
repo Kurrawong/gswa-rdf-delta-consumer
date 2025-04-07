@@ -6,15 +6,9 @@ Note that the database function app trigger is not supported on the flex consump
 
 This function app has been tested with the App Service plan.
 
-## Local Development
-
-Create a `.env` file in this directory with the same values from `.env-template`.
-
-Start the function by running `task dev`.
-
 ## Configuration
 
-The following environment variables need to be set on the azure function app.
+The following environment variables need to be set on the azure function app for python 3.11.
 
 | variable                   | example value                                                                                                                                                                                     | description                                                                                                                   |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -25,7 +19,9 @@ The following environment variables need to be set on the azure function app.
 | SqlConnectionString        | Server=tcp:gswa-rdf-delta-events.database.windows.net,1433;Database=rdf-delta;Uid=...;Pwd=...;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;TrustServerCertificate=True;            | connection string for the database used by the function trigger                                                               |
 | SQL_CONNECTION_STRING_ODBC | Driver={ODBC Driver 18 for SQL Server};Server=tcp:gswa-rdf-delta-events.database.windows.net,1433;Database=rdf-delta;Uid=...;Pwd=...;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30; | connection string for the database - requires the ODBC Driver to be 17 for python 3.10 and 18 for python 3.11                 |
 
-## Local settings
+## Local Development
+
+### Local settings
 
 ```json
 {
@@ -44,3 +40,5 @@ The following environment variables need to be set on the azure function app.
   "ConnectionStrings": {}
 }
 ```
+
+Start the function by running `task dev`.
