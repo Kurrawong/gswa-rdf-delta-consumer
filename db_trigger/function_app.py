@@ -21,8 +21,8 @@ async def event_trigger(event: str) -> None:
 
     async with Client(
         conn_str=settings.service_bus,
-        topic=settings.topic_name,
-        ws=settings.ws,
+        topic=settings.service_bus_topic,
+        ws=settings.use_amqp_over_ws,
     ) as client:
         for row in rows:
             event_published = row["Item"]["EventPublished"]
@@ -36,7 +36,7 @@ async def event_trigger(event: str) -> None:
 
                 try:
                     await client.send_message(
-                        session_id=settings.session_id,
+                        session_id=settings.service_bus_session_id,
                         message=row["Item"]["EventBody"],
                         metadata=metadata,
                     )

@@ -10,16 +10,13 @@ This function app has been tested with the App Service plan deployed in the Cana
 
 The following environment variables need to be set on the azure function app for python 3.11.
 
-Notice that there are two database connection string configuration variables. One is used by the function trigger (without specifying the driver) and the other is used by the function app code to write to the database (requires the ODBC Driver to be specified).
-
-| variable                   | example value                                                                                                                                                                                     | description                                                                                                                   |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| SERVICE_BUS                | Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;                                                                                              | service bus connection string                                                                                                 |
-| TOPIC_NAME                 | rdf-delta-events                                                                                                                                                                                  | name of service bus topic                                                                                                     |
-| SESSION_ID                 | main                                                                                                                                                                                              | service bus session identifier. needs to be the same value as set <br> in the `SHUI_SERVICE_BUS__SESSION_ID` variable in #137 |
-| WS                         | true                                                                                                                                                                                              | whether to use amqp over websockets                                                                                           |
-| SqlConnectionString        | Server=tcp:gswa-rdf-delta-events.database.windows.net,1433;Database=rdf-delta;Uid=...;Pwd=...;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;TrustServerCertificate=True;            | connection string for the database used by the function trigger. This must not contain the driver name.                       |
-| SQL_CONNECTION_STRING_ODBC | Driver={ODBC Driver 18 for SQL Server};Server=tcp:gswa-rdf-delta-events.database.windows.net,1433;Database=rdf-delta;Uid=...;Pwd=...;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30; | connection string for the database - requires the ODBC Driver to be 17 for python 3.10 and 18 for python 3.11                 |
+| variable               | example value                                                                                                                                                                          | description                                                                                                                   |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| SERVICE_BUS            | Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;                                                                                   | service bus connection string                                                                                                 |
+| SERVICE_BUS_TOPIC      | rdf-delta-events                                                                                                                                                                       | name of service bus topic                                                                                                     |
+| SERVICE_BUS_SESSION_ID | main                                                                                                                                                                                   | service bus session identifier. needs to be the same value as set <br> in the `SHUI_SERVICE_BUS__SESSION_ID` variable in #137 |
+| USE_AMQP_OVER_WS       | true                                                                                                                                                                                   | whether to use amqp over websockets                                                                                           |
+| SqlConnectionString    | Server=tcp:gswa-rdf-delta-events.database.windows.net,1433;Database=rdf-delta;Uid=...;Pwd=...;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;TrustServerCertificate=True; | connection string for the database used by the function trigger                                                               |
 
 ### Running
 
@@ -73,11 +70,10 @@ END
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "WEBSITE_SITE_NAME": "db-trigger",
     "SqlConnectionString": "Server=tcp:gswa-rdf-delta-events.database.windows.net,1433;Database=rdf-delta;Uid=...;Pwd=...;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;",
-    "SQL_CONNECTION_STRING_ODBC": "Driver={ODBC Driver 17 for SQL Server};Server=tcp:gswa-rdf-delta-events.database.windows.net,1433;Database=rdf-delta;Uid=...;Pwd=...;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;",
     "SERVICE_BUS": "Endpoint=sb://gswaservicebus.servicebus.windows.net/;SharedAccessKeyName=...;SharedAccessKey=...",
-    "TOPIC_NAME": "rdf-delta-events",
-    "SESSION_ID": "main",
-    "WS": "false"
+    "SERVICE_BUS_TOPIC": "rdf-delta-events",
+    "SERVICE_BUS_SESSION_ID": "main",
+    "USE_AMQP_OVER_WS": "false"
   },
   "ConnectionStrings": {}
 }
