@@ -1,11 +1,6 @@
 # Event Persistence Consumer
 
-This function consumes from a "sessionful" service bus topic, processes a message
-(RDF, RDF Patch Log or SPARQL Update queries) and sends it to the RDF Delta Server or Fuseki SPARQL Update endpoint.
-
-In a future iteration, it will integrate with Olis and do some message processing before sending it off to the target services.
-
-This repository should be deployed as an azure function app.
+This function consumes from a "sessionful" service bus topic, processes a message and persists it to a SQL Database.
 
 ## Setting up the topic
 
@@ -28,23 +23,18 @@ app.
 
 ### Configuration
 
-The following environment variables need to be set on the azure function app.
+The following environment variables need to be set on the azure function app for python 3.11.
 
-| variable                 | example value                                                                                                                    | description                                                                                                                   |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| SERVICE_BUS              | Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true; | service bus connection string                                                                                                 |
-| SERVICE_BUS_TOPIC        | rdf-delta                                                                                                                        | name of service bus topic                                                                                                     |
-| SERVICE_BUS_SUBSCRIPTION | event-persistence-consumer                                                                                                       | name of service bus subscription                                                                                              |
-| SESSION_ID               | main                                                                                                                             | service bus session identifier. needs to be the same value as set <br> in the `SHUI_SERVICE_BUS__SESSION_ID` variable in #137 |
-| RDF_DELTA_URL            | https://myrdfdeltaserver.azurewebsites.net                                                                                       | url for rdf delta server                                                                                                      |
-| RDF_DELTA_DATASOURCE     | ds                                                                                                                               | datasource name to submit patch logs to in rdf delta server                                                                   |
-| SqlConnectionString      | DRIVER={ODBC Driver 17 for SQL Server};SERVER=db,1433;DATABASE=rdf_delta;UID=sa;PWD=P@ssw0rd!;                                   | connection string for the database                                                                                            |
+| variable                 | example value                                                                                                                                                                                     | description                                                                                                   |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| SERVICE_BUS              | Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;                                                                  | service bus connection string                                                                                 |
+| SERVICE_BUS_TOPIC        | rdf-delta                                                                                                                                                                                         | name of service bus topic                                                                                     |
+| SERVICE_BUS_SUBSCRIPTION | event-persistence-consumer                                                                                                                                                                        | name of service bus subscription                                                                              |
+| SqlConnectionString      | Driver={ODBC Driver 18 for SQL Server};Server=tcp:gswa-rdf-delta-events.database.windows.net,1433;Database=rdf-delta;Uid=...;Pwd=...;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30; | connection string for the database - requires the ODBC Driver to be 17 for python 3.10 and 18 for python 3.11 |
 
 ## Local Development
 
 ### Setting Up
-
-Create a local.settings.json file and copy the example data into it.
 
 ```json
 {
@@ -53,9 +43,6 @@ Create a local.settings.json file and copy the example data into it.
     "SERVICE_BUS": "Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;",
     "SERVICE_BUS_SUBSCRIPTION": "event-persistence-consumer",
     "SERVICE_BUS_TOPIC": "rdf-delta",
-    "SESSION_ID": "main",
-    "RDF_DELTA_URL": "http://rdf-delta-server:1066",
-    "RDF_DELTA_DATASOURCE": "ds",
     "FUNCTIONS_WORKER_RUNTIME": "python",
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "SqlConnectionString": "DRIVER={ODBC Driver 17 for SQL Server};SERVER=db,1433;DATABASE=rdf_delta;UID=sa;PWD=P@ssw0rd!;"
@@ -64,21 +51,25 @@ Create a local.settings.json file and copy the example data into it.
 }
 ```
 
-Populate the `SERVICE_BUS` value with the connection string for service bus. Update the other values as needed.
-
 For more information, refer to [this article](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=linux%2Cisolated-process%2Cnode-v4%2Cpython-v2%2Chttp-trigger%2Ccontainer-apps&pivots=programming-language-python#local-settings)
 for information about configuring local app settings.
 
-### Running
-
-Before starting the function app, initialise the database by running the init.py script.
+### Start the local function app.
 
 ```bash
-python init.py
+task dev
 ```
 
-Start the local function app.
+### Local Dev Env Vars
+
+The `.env` file is used to set the environment variables for the local development environment.
+
+The `SERVICE_BUS` value is only used by the `sb_producer.py` script.
+
+The `SqlConnectionString` value is used by the `init_db.py` script.
+
+### Deploy test function app to Azure
 
 ```bash
-func start
+task deploy
 ```

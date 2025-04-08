@@ -1,21 +1,8 @@
 import logging
 
 from azure.servicebus import ServiceBusMessage, TransportType
-from azure.servicebus._pyamqp import AMQPClient
 from azure.servicebus.aio import ServiceBusClient
 from rdflib import SDO
-
-# Workaround for service bus emulator retrieved from https://github.com/Azure/azure-sdk-for-python/issues/34273#issuecomment-2503806488
-# Disable TLS. Workaround for https://github.com/Azure/azure-sdk-for-python/issues/34273
-org_init = AMQPClient.__init__
-
-
-def new_init(self, hostname, **kwargs):
-    kwargs["use_tls"] = False
-    org_init(self, hostname, **kwargs)
-
-
-AMQPClient.__init__ = new_init
 
 logger = logging.getLogger(__name__)
 

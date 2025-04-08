@@ -5,7 +5,7 @@ This function consumes from a "sessionful" service bus topic, processes a messag
 
 In a future iteration, it will integrate with Olis and do some message processing before sending it off to the target services.
 
-This repository should be deployed as an azure function app.
+This repository is deployed as an azure function app on python 3.11.
 
 ## Setting up the topic
 
@@ -30,14 +30,13 @@ app.
 
 The following environment variables need to be set on the azure function app.
 
-| variable                 | example value                              | description                                                                                                                   |
-| ------------------------ | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| SERVICE_BUS              | Endpoint=sb.//...                          | service bus connection string                                                                                                 |
-| SERVICE_BUS_TOPIC        | my-topic                                   | name of service bus topic                                                                                                     |
-| SERVICE_BUS_SUBSCRIPTION | my-sub                                     | name of service bus subscription                                                                                              |
-| SESSION_ID               | main                                       | service bus session identifier. needs to be the same value as set <br> in the `SHUI_SERVICE_BUS__SESSION_ID` variable in #137 |
-| RDF_DELTA_URL            | https://myrdfdeltaserver.azurewebsites.net | url for rdf delta server                                                                                                      |
-| RDF_DELTA_DATASOURCE     | myds                                       | datasource name to submit patch logs to in rdf delta server                                                                   |
+| variable                 | example value                                                                                        | description                                                 |
+| ------------------------ | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| SERVICE_BUS              | Endpoint=sb://gswaservicebus.servicebus.windows.net/;SharedAccessKeyName=testSAP;SharedAccessKey=... | service bus connection string                               |
+| SERVICE_BUS_TOPIC        | rdf-delta-events                                                                                     | name of service bus topic                                   |
+| SERVICE_BUS_SUBSCRIPTION | rdf-delta-events-consumer                                                                            | name of service bus subscription                            |
+| RDF_DELTA_URL            | https://myrdfdeltaserver.azurewebsites.net                                                           | url for rdf delta server                                    |
+| RDF_DELTA_DATASOURCE     | ds                                                                                                   | datasource name to submit patch logs to in rdf delta server |
 
 ## Local Development
 
@@ -50,9 +49,8 @@ Create a local.settings.json file and copy the example data into it.
   "IsEncrypted": false,
   "Values": {
     "SERVICE_BUS": "Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;",
-    "SERVICE_BUS_SUBSCRIPTION": "rdf-delta-consumer",
+    "SERVICE_BUS_SUBSCRIPTION": "rdf-delta-events-consumer",
     "SERVICE_BUS_TOPIC": "rdf-delta-events",
-    "SESSION_ID": "main",
     "RDF_DELTA_URL": "http://rdf-delta-server:1066",
     "RDF_DELTA_DATASOURCE": "ds",
     "FUNCTIONS_WORKER_RUNTIME": "python"
@@ -71,5 +69,11 @@ for information about configuring local app settings.
 Start the local function app.
 
 ```bash
-func start
+task dev
 ```
+
+### Testing
+
+Testing is a hybrid solution where the other function apps and the SQL database are deployed in Azure while the RDF Delta Server and the Fuseki database are tested locally.
+
+To connect from this function app to the local RDF Delta Server, it is necessary to run this function app locally.

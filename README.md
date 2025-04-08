@@ -14,7 +14,7 @@ The consumer consumes events from the `rdf-delta` topic and persists them in the
 
 ### SQL Database Trigger
 
-Source code: [sql_database_trigger](sql_database_trigger)
+Source code: [db_trigger](db_trigger)
 
 A SQL database function trigger. The function runs when updates are made to the `Event` table in the `rdf_delta` database.
 

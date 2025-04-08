@@ -34,3 +34,8 @@ tasks:
   test:
     desc: Run the tests
     cmd: .venv/bin/pytest
+
+  deploy:
+    desc: Deploy the function app to azure
+    cmds:
+      - func azure functionapp publish gswa-dbtrigger
