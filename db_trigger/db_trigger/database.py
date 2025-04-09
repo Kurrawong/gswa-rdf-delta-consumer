@@ -3,7 +3,8 @@ import logging
 from contextlib import ContextDecorator, contextmanager
 from typing import Iterator
 
-import pyodbc
+import pyodbc, struct
+from azure.identity import DefaultAzureCredential
 
 logger = logging.getLogger(__name__)
 
@@ -25,12 +26,21 @@ def get_connection_manager(
             logger.debug(f"Closed connection to {database} on {server}")
 
 
-def get_connection(
-    connection_str: str,
-) -> pyodbc.Connection:
-    """Get a db connection."""
-    connection = pyodbc.connect(connection_str)
-    return connection
+def get_connection(connection_string: str) -> pyodbc.Connection:
+    credential = DefaultAzureCredential(
+        exclude_interactive_browser_credential=False
+    )
+    token_bytes = credential.get_token(
+        "https://database.windows.net/.default"
+    ).token.encode("UTF-16-LE")
+    token_struct = struct.pack(f"<I{len(token_bytes)}s", len(token_bytes), token_bytes)
+    SQL_COPT_SS_ACCESS_TOKEN = (
+        1256  # This connection option is defined by microsoft in msodbcsql.h
+    )
+    conn = pyodbc.connect(
+        connection_string, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct}
+    )
+    return conn
 
 
 def create_database_if_not_exists(connection: pyodbc.Connection, database: str) -> None:

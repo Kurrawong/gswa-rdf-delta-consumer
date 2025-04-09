@@ -25,12 +25,12 @@ app.
 
 The following environment variables need to be set on the azure function app for python 3.11.
 
-| variable                 | example value                                                                                                                                                                                     | description                                                                                                   |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| SERVICE_BUS              | Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;                                                                  | service bus connection string                                                                                 |
-| SERVICE_BUS_TOPIC        | rdf-delta                                                                                                                                                                                         | name of service bus topic                                                                                     |
-| SERVICE_BUS_SUBSCRIPTION | event-persistence-consumer                                                                                                                                                                        | name of service bus subscription                                                                              |
-| SqlConnectionString      | Driver={ODBC Driver 18 for SQL Server};Server=tcp:gswa-rdf-delta-events.database.windows.net,1433;Database=rdf-delta;Uid=...;Pwd=...;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30; | connection string for the database - requires the ODBC Driver to be 17 for python 3.10 and 18 for python 3.11 |
+| variable                 | example value                                                                                                                                                     | description                                                                                                                   |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| SERVICE_BUS              | Endpoint=sb://myservicebus.servicebus.windows.net/;SharedAccessKeyName=...;SharedAccessKey=...                                                                    | service bus connection string                                                                                                 |
+| SERVICE_BUS_TOPIC        | mysb-topic                                                                                                                                                        | name of service bus topic                                                                                                     |
+| SERVICE_BUS_SUBSCRIPTION | mysb-sub                                                                                                                                                          |
+| SqlConnectionString      | Driver={ODBC Driver 18 for SQL Server};Server=tcp:myazuresql.database.windows.net,1433;Database=mydb;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30; | connection string for the database, azure default credential will be used, so no need to specify the Authentication parameter |
 
 ## Local Development
 
@@ -40,12 +40,11 @@ The following environment variables need to be set on the azure function app for
 {
   "IsEncrypted": false,
   "Values": {
-    "SERVICE_BUS": "Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;",
-    "SERVICE_BUS_SUBSCRIPTION": "event-persistence-consumer",
-    "SERVICE_BUS_TOPIC": "rdf-delta",
     "FUNCTIONS_WORKER_RUNTIME": "python",
-    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-    "SqlConnectionString": "DRIVER={ODBC Driver 17 for SQL Server};SERVER=db,1433;DATABASE=rdf_delta;UID=sa;PWD=P@ssw0rd!;"
+    "SERVICE_BUS": "Endpoint=sb://myservicebus.servicebus.windows.net/;SharedAccessKeyName=...;SharedAccessKey=...",
+    "SERVICE_BUS_SUBSCRIPTION": "mysb-sub",
+    "SERVICE_BUS_TOPIC": "mysb-topic",
+    "SqlConnectionString": "DRIVER={ODBC Driver 18 for SQL Server};SERVER=db,1433;DATABASE=rdf_delta;UID=sa;PWD=P@ssw0rd!;"
   },
   "ConnectionStrings": {}
 }
