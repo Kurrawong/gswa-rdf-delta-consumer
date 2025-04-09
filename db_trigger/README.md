@@ -58,6 +58,19 @@ BEGIN
 END
 ```
 
+Add users and assign permissions on the database.
+Using the system managed identity for the db_trigger and event_persistence_consumer apps
+
+```sql
+CREATE USER <identity-name> FROM EXTERNAL PROVIDER
+ALTER ROLE db_datareader ADD MEMBER <identity-name>
+ALTER ROLE db_datawriter ADD MEMBER <identity-name>
+```
+
+> <identity-name> is the name of the managed identity in Microsoft Entra ID.
+> If the identity is system-assigned, the name is always the same as the name of the
+> function app.
+
 ## Local Development
 
 ### Local settings
