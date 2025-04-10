@@ -1,72 +1,35 @@
 -e ./db_trigger
-
 aiohappyeyeballs==2.4.4
-    # via aiohttp
 aiohttp==3.11.11
-    # via event-persistence-consumer
 aiosignal==1.3.2
-    # via aiohttp
 annotated-types==0.7.0
-    # via pydantic
 attrs==24.3.0
-    # via aiohttp
 azure-core==1.32.0
-    # via azure-servicebus
 azure-functions==1.21.3
-    # via
-    #   db-trigger (pyproject.toml)
-    #   event-persistence-consumer
+azure-identity==1.21.0
 azure-servicebus==7.13.0
-    # via event-persistence-consumer
 certifi==2024.12.14
-    # via requests
+cffi==1.17.1
 charset-normalizer==3.4.1
-    # via requests
+cryptography==44.0.2
 frozenlist==1.5.0
-    # via
-    #   aiohttp
-    #   aiosignal
 idna==3.10
-    # via
-    #   requests
-    #   yarl
 isodate==0.7.2
-    # via azure-servicebus
+msal==1.32.0
+msal-extensions==1.3.1
 multidict==6.1.0
-    # via
-    #   aiohttp
-    #   yarl
 propcache==0.2.1
-    # via
-    #   aiohttp
-    #   yarl
+pycparser==2.22
 pydantic==2.10.4
-    # via pydantic-settings
-pydantic-core==2.27.2
-    # via pydantic
 pydantic-settings==2.6.1
-    # via event-persistence-consumer
+pydantic_core==2.27.2
+PyJWT==2.10.1
 pyodbc==5.2.0
-    # via
-    #   db-trigger (pyproject.toml)
-    #   event-persistence-consumer
 pyparsing==3.2.1
-    # via rdflib
 python-dotenv==1.0.1
-    # via pydantic-settings
 rdflib==7.1.1
-    # via event-persistence-consumer
 requests==2.32.3
-    # via azure-core
 six==1.17.0
-    # via azure-core
-typing-extensions==4.12.2
-    # via
-    #   azure-core
-    #   azure-servicebus
-    #   pydantic
-    #   pydantic-core
+typing_extensions==4.12.2
 urllib3==2.3.0
-    # via requests
 yarl==1.18.3
-    # via aiohttp

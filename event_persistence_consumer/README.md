@@ -1,75 +1,70 @@
 # Event Persistence Consumer
 
+## Overview
+
 This function consumes from a "sessionful" service bus topic, processes a message and persists it to a SQL Database.
-
-## Setting up the topic
-
-Create a new topic `rdf-delta`. No need to check any additional settings. Message ordering is enforced by using sessions in the consumer (subscriber).
 
 ## Deployment
 
-Deployment can be done from the command line using the
-[azure-functions-core-tools](https://github.com/Azure/azure-functions-core-tools) library.
+### Pre-requisites
 
-To deploy you need to have created a function app and then run the following command:
+- Service Bus topic with a sessionful subscription
+- Azure SQL Database and Event Table
 
-```bash
-func azure functionapp fetch-app-settings <app_name>
-func azure functionapp publish <app_name>
+### Create the function app
+
+1. Create a function app with the Python 3.11 runtime.
+2. Enable the System Managed Identity for the app.
+
+### Configure the Azure SQL Database
+
+1. Add the app as a user to the Azure SQL Database and assign the necessary permissions
+
+```sql
+CREATE USER [<identity-name>] FROM EXTERNAL PROVIDER;
+ALTER ROLE db_datareader ADD MEMBER [<identity-name>];
+ALTER ROLE db_datawriter ADD MEMBER [<identity-name>];
+GRANT VIEW CHANGE TRACKING ON [Event] TO [<identity-name>];
 ```
 
-After deployment you then need to set the below configuration options and restart the
-app.
+> where \<identity-name> is the name of the managed identity in Microsoft Entra ID.
+> If the identity is system-assigned, the name is always the same as the name of the
+> function app.
 
-### Configuration
+### Deploy the code
 
-The following environment variables need to be set on the azure function app for python 3.11.
+1. Deploy the function app code to the function app.
 
-| variable                 | example value                                                                                                                                                                                     | description                                                                                                   |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| SERVICE_BUS              | Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;                                                                  | service bus connection string                                                                                 |
-| SERVICE_BUS_TOPIC        | rdf-delta                                                                                                                                                                                         | name of service bus topic                                                                                     |
-| SERVICE_BUS_SUBSCRIPTION | event-persistence-consumer                                                                                                                                                                        | name of service bus subscription                                                                              |
-| SqlConnectionString      | Driver={ODBC Driver 18 for SQL Server};Server=tcp:gswa-rdf-delta-events.database.windows.net,1433;Database=rdf-delta;Uid=...;Pwd=...;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30; | connection string for the database - requires the ODBC Driver to be 17 for python 3.10 and 18 for python 3.11 |
+This can be done in a number of ways. including via devops pipeline or
+the azure functions core tools cli.
 
-## Local Development
+### Configure the function app
 
-### Setting Up
+#### Environment variables
 
-```json
-{
-  "IsEncrypted": false,
-  "Values": {
-    "SERVICE_BUS": "Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;",
-    "SERVICE_BUS_SUBSCRIPTION": "event-persistence-consumer",
-    "SERVICE_BUS_TOPIC": "rdf-delta",
-    "FUNCTIONS_WORKER_RUNTIME": "python",
-    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-    "SqlConnectionString": "DRIVER={ODBC Driver 17 for SQL Server};SERVER=db,1433;DATABASE=rdf_delta;UID=sa;PWD=P@ssw0rd!;"
-  },
-  "ConnectionStrings": {}
-}
-```
+| variable                 | example value                                                                                                               | description                                                                                                                                                                                                                                      |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| SERVICE_BUS              | Endpoint=...;SharedAccessKeyName=...;SharedAccessKey=...                                                                    | service bus connection string                                                                                                                                                                                                                    |
+| SERVICE_BUS_TOPIC        | my-topic                                                                                                                    | name of service bus topic to consume from                                                                                                                                                                                                        |
+| SERVICE_BUS_SUBSCRIPTION | my-topic-sub                                                                                                                      | name of service bus subscription to use (must have sessions enabled)                                                                                                                                                                             |
+| SqlConnectionString      | Driver={ODBC Driver 18 for SQL Server};Server=...;Database=...;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30; | Azure SQL connection string. Driver must be specified and Authentication must not be specified. The function code will automatically acquire a token for the apps system managed identity and use that for authentication to Azure SQL Database. |
 
-For more information, refer to [this article](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=linux%2Cisolated-process%2Cnode-v4%2Cpython-v2%2Chttp-trigger%2Ccontainer-apps&pivots=programming-language-python#local-settings)
-for information about configuring local app settings.
+## Development
 
-### Start the local function app.
+Environment variables should be set in the `local.settings.json` file (not kept in
+version control).
+
+Python dependencies are managed with the `requirements.txt` file and can be installed
+with:
 
 ```bash
-task dev
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
-### Local Dev Env Vars
-
-The `.env` file is used to set the environment variables for the local development environment.
-
-The `SERVICE_BUS` value is only used by the `sb_producer.py` script.
-
-The `SqlConnectionString` value is used by the `init_db.py` script.
-
-### Deploy test function app to Azure
+Using the core tools cli you can start and test the function app locally by running
 
 ```bash
-task deploy
+func start
 ```

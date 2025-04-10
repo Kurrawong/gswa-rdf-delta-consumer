@@ -2,8 +2,9 @@ import json
 import logging
 from contextlib import ContextDecorator, contextmanager
 from typing import Iterator
+from azure import identity
 
-import pyodbc
+import pyodbc, struct
 
 logger = logging.getLogger(__name__)
 
@@ -25,12 +26,21 @@ def get_connection_manager(
             logger.debug(f"Closed connection to {database} on {server}")
 
 
-def get_connection(
-    connection_str: str,
-) -> pyodbc.Connection:
-    """Get a db connection."""
-    connection = pyodbc.connect(connection_str)
-    return connection
+def get_connection(connection_string: str) -> pyodbc.Connection:
+    credential = identity.DefaultAzureCredential(
+        exclude_interactive_browser_credential=False
+    )
+    token_bytes = credential.get_token(
+        "https://database.windows.net/.default"
+    ).token.encode("UTF-16-LE")
+    token_struct = struct.pack(f"<I{len(token_bytes)}s", len(token_bytes), token_bytes)
+    SQL_COPT_SS_ACCESS_TOKEN = (
+        1256  # This connection option is defined by microsoft in msodbcsql.h
+    )
+    conn = pyodbc.connect(
+        connection_string, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct}
+    )
+    return conn
 
 
 def create_database_if_not_exists(connection: pyodbc.Connection, database: str) -> None:
@@ -41,22 +51,26 @@ def create_database_if_not_exists(connection: pyodbc.Connection, database: str) 
     """
     with connection.cursor() as cursor:
         connection.autocommit = True
-        cursor.execute(f"""
+        cursor.execute(
+            f"""
             IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = '{database}')
             BEGIN
                 CREATE DATABASE {database};
             END
-        """)
+        """
+        )
         connection.autocommit = False
 
 
 def get_databases(connection: pyodbc.Connection) -> list[str]:
     """Get a list of all databases."""
     with connection.cursor() as cursor:
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT name
             FROM sys.databases
-        """)
+        """
+        )
         rows = cursor.fetchall()
         return [row.name for row in rows]
 
@@ -65,22 +79,26 @@ def delete_database(connection: pyodbc.Connection, database: str) -> None:
     """Delete a database if exists."""
     with connection.cursor() as cursor:
         connection.autocommit = True
-        cursor.execute(f"""
+        cursor.execute(
+            f"""
             IF EXISTS (SELECT * FROM sys.databases WHERE name = '{database}')
             BEGIN
                 DROP DATABASE {database};
             END
-        """)
+        """
+        )
         connection.autocommit = False
 
 
 def get_tables(connection: pyodbc.Connection) -> list[str]:
     """Get a list of all tables."""
     with connection.cursor() as cursor:
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT name
             FROM sys.tables
-        """)
+        """
+        )
         rows = cursor.fetchall()
         return [row.name for row in rows]
 
@@ -88,7 +106,8 @@ def get_tables(connection: pyodbc.Connection) -> list[str]:
 def create_event_table_if_not_exists(connection: pyodbc.Connection) -> None:
     """Create the Event table if not exists."""
     with connection.cursor() as cursor:
-        cursor.execute("""
+        cursor.execute(
+            """
             IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Event')
             BEGIN
                 CREATE TABLE Event (
@@ -98,7 +117,8 @@ def create_event_table_if_not_exists(connection: pyodbc.Connection) -> None:
                     EventPublished BIT DEFAULT 'FALSE'
                 )
             END
-        """)
+        """
+        )
 
 
 def enable_database_change_tracking(
@@ -107,28 +127,32 @@ def enable_database_change_tracking(
     """Enable change tracking on the database."""
     with connection.cursor() as cursor:
         connection.autocommit = True
-        cursor.execute(f"""
+        cursor.execute(
+            f"""
             IF NOT EXISTS (SELECT * FROM sys.change_tracking_databases WHERE database_id = DB_ID('{database}'))
             BEGIN
                 ALTER DATABASE {database}
                 SET CHANGE_TRACKING = ON
                 (CHANGE_RETENTION = {retention_in_days} DAYS, AUTO_CLEANUP = ON)
             END
-        """)
+        """
+        )
         connection.autocommit = False
 
 
 def enable_table_change_tracking(connection: pyodbc.Connection, table: str) -> None:
     """Enable change tracking on the table."""
     with connection.cursor() as cursor:
-        cursor.execute(f"""
+        cursor.execute(
+            f"""
             IF NOT EXISTS (SELECT * FROM sys.change_tracking_tables WHERE object_id = OBJECT_ID('{table}'))
             BEGIN
                 ALTER TABLE {table}
                 ENABLE CHANGE_TRACKING
                 WITH (TRACK_COLUMNS_UPDATED = ON)
             END
-        """)
+        """
+        )
 
 
 class EventTable:
@@ -195,12 +219,14 @@ class EventTable:
     def get_unpublished_events(self) -> list[tuple[int, dict, str]]:
         """Get a list of all unpublished events sorted by EventID."""
         with self.connection.cursor() as cursor:
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT EventID, EventHeader, EventBody
                 FROM Event
                 WHERE EventPublished = 'FALSE'
                 ORDER BY EventID
-            """)
+            """
+            )
             rows = cursor.fetchall()
             return [
                 (row.EventID, json.loads(row.EventHeader), row.EventBody)
