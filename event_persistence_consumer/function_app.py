@@ -47,9 +47,6 @@ def servicebus_topic_trigger(message: func.ServiceBusMessage):
          """
         )
     )
-    if message.content_type is None:
-        raise ValueError(
-            f"message {message.message_id} missing content-type header")
     try:
         with Database(settings.sql_connection_string) as db:
             table = EventTable(db.connection)
