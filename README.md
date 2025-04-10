@@ -120,6 +120,7 @@ bus topic with the following parameters:
 ```
 content_type: text/plain
 metadata: { "https://schema.org/encodingFormat": "application/trig" }
+session_is: mysessionid
 body:
   <http://mygraph> {
     <a> <b> <c> .
