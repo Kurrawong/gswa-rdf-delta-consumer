@@ -1,101 +1,90 @@
-# SQL Database Trigger for the Event Table
+# Azure SQL Database Trigger
 
-This service publishes all rows as events to the `rdf-delta-events` topic in service bus if the `EventPublished` column is set to `FALSE`.
+## Overview
 
-Note that the database function app trigger is not supported on the flex consumption plan. See https://learn.microsoft.com/en-us/azure/azure-functions/flex-consumption-plan#considerations.
+This function app publishes rows from an Azure SQL database table called `Event`
+to a service bus topic.
 
-This function app has been tested with the App Service plan deployed in the Canada Central region. Some configuration settings are not supported in the Australian regions.
+The `Event` table is populated with messages from the `event persistence consumer`
+function.
 
-## Configuration
+The Event table maintains a record of which rows have been published
+in the `EventPublished` column.
 
-The following environment variables need to be set on the azure function app for python 3.11.
+The function app is triggered by change events coming from the database table. And thus
+change tracking must be enabled on the database and table to support triggering of this
+function.
 
-| variable               | example value                                                                                                                                                                          | description                                                                                                                   |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| SERVICE_BUS            | Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;                                                                                   | service bus connection string                                                                                                 |
-| SERVICE_BUS_TOPIC      | rdf-delta-events                                                                                                                                                                       | name of service bus topic                                                                                                     |
-| SERVICE_BUS_SESSION_ID | main                                                                                                                                                                                   | service bus session identifier. needs to be the same value as set <br> in the `SHUI_SERVICE_BUS__SESSION_ID` variable in #137 |
-| USE_AMQP_OVER_WS       | true                                                                                                                                                                                   | whether to use amqp over websockets                                                                                           |
-| SqlConnectionString    | Server=tcp:gswa-rdf-delta-events.database.windows.net,1433;Database=rdf-delta;Uid=...;Pwd=...;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;TrustServerCertificate=True; | connection string for the database used by the function trigger                                                               |
+> [!IMPORTANT]  
+> The [Azure SQL trigger](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-azure-sql-trigger?tabs=isolated-process%2Cpython-v2%2Cportal&pivots=programming-language-python)
+> is [not supported by the Flex Consumption plan](https://learn.microsoft.com/en-us/azure/azure-functions/flex-consumption-plan#considerations),
+> and is only available under the **Python 3.10 runtime**.
 
-### Running
+Instructions for creating and configuring the Azure SQL Database table are given below.
 
-Once the SQL Database has been created, in the Query Editor, run the following.
+## Deployment
 
-Enable database change tracking.
+### Pre-requisites
 
-```sql
-IF NOT EXISTS (SELECT * FROM sys.change_tracking_databases WHERE database_id = DB_ID('rdf-delta'))
-BEGIN
-    ALTER DATABASE [rdf-delta]
-    SET CHANGE_TRACKING = ON
-    (CHANGE_RETENTION = 2 DAYS, AUTO_CLEANUP = ON)
-END
-```
+- Azure SQL Database and Event Table
+- Service Bus topic
 
-Create the table.
+### Create the function app
 
-```sql
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Event')
-BEGIN
-    CREATE TABLE Event (
-        EventID BIGINT IDENTITY(1,1) PRIMARY KEY,
-        EventHeader NVARCHAR(4000),
-        EventBody NVARCHAR(MAX),
-        EventPublished BIT DEFAULT 'FALSE'
-    )
-END
-```
+1. Create a function app with the Python 3.10 runtime and not the Flex Consumption
+   hosting plan
+2. Enable the System Managed Identity for the app.
 
-Enable table change tracking.
+### Configure the Azure SQL Database
+
+1. Add the app as a user to the Azure SQL Database and assign the necessary permissions
 
 ```sql
-IF NOT EXISTS (SELECT * FROM sys.change_tracking_tables WHERE object_id = OBJECT_ID('Event'))
-BEGIN
-    ALTER TABLE [Event]
-    ENABLE CHANGE_TRACKING
-    WITH (TRACK_COLUMNS_UPDATED = ON)
-END
+CREATE USER [<identity-name>] FROM EXTERNAL PROVIDER;
+ALTER ROLE db_datareader ADD MEMBER [<identity-name>];
+ALTER ROLE db_datawriter ADD MEMBER [<identity-name>];
+GRANT VIEW CHANGE TRACKING ON [Event] TO gswasdt;
 ```
 
-Add users and assign permissions on the database.
-Using the system managed identity for the db_trigger and event_persistence_consumer apps
-
-```sql
-CREATE USER <identity-name> FROM EXTERNAL PROVIDER
-ALTER ROLE db_datareader ADD MEMBER <identity-name>
-ALTER ROLE db_datawriter ADD MEMBER <identity-name>
-```
-
-> <identity-name> is the name of the managed identity in Microsoft Entra ID.
+> where <identity-name> is the name of the managed identity in Microsoft Entra ID.
 > If the identity is system-assigned, the name is always the same as the name of the
 > function app.
 
-## Local Development
+### Deploy the code
 
-### Local settings
+1. Deploy the function app code to the function app.
 
-```json
-{
-  "IsEncrypted": false,
-  "Values": {
-    "FUNCTIONS_WORKER_RUNTIME": "python",
-    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-    "WEBSITE_SITE_NAME": "db-trigger",
-    "SqlConnectionString": "Server=tcp:gswa-rdf-delta-events.database.windows.net,1433;Database=rdf-delta;Uid=...;Pwd=...;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;",
-    "SERVICE_BUS": "Endpoint=sb://gswaservicebus.servicebus.windows.net/;SharedAccessKeyName=...;SharedAccessKey=...",
-    "SERVICE_BUS_TOPIC": "rdf-delta-events",
-    "SERVICE_BUS_SESSION_ID": "main",
-    "USE_AMQP_OVER_WS": "false"
-  },
-  "ConnectionStrings": {}
-}
-```
+This can be done in a number of ways. including via devops pipeline or
+the azure functions core tools cli.
 
-Start the function by running `task dev`.
+### Configure the function app
 
-### Deploy test function app to Azure
+#### Environment variables
+
+| variable               | example value                                                                                                               | description                                                                                                                                                                            |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SERVICE_BUS            | Endpoint=...;SharedAccessKeyName=...;SharedAccessKey=...;                                                                   | service bus connection string                                                                                                                                                          |
+| SERVICE_BUS_TOPIC      | my-second-topic                                                                                                             | name of service bus topic to publish events to                                                                                                                                         |
+| SERVICE_BUS_SESSION_ID | main                                                                                                                        | service bus session identifier. needs to be the same value as set in KG CMS                                                                                                            |
+| USE_AMQP_OVER_WS       | true                                                                                                                        | whether to use amqp over websockets for the service bus connection                                                                                                                     |
+| SqlConnectionString    | Server=...;Database=...;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;Authentication=Active Directory Default | connection string for Azure SQL Database, `Authentication=Active Directory Default` will use the system managed identity of the function app to authenticate to the Azure SQL Database |
+
+## Development
+
+Environment variables should be set in the `local.settings.json` file (not kept in
+version control).
+
+Python dependencies are managed with the `requirements.txt` file and can be installed
+with:
 
 ```bash
-task deploy
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+Using the core tools cli you can start and test the function app locally by running
+
+```bash
+func start
 ```

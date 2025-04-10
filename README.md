@@ -1,34 +1,124 @@
-# GSWA RDF Delta Services
+# GSWA Event Services
 
-This repository contains several microservices that make up the GSWA RDF Delta Services.
+This repository contains several microservices that make up the GSWA Event System.
 
 ## Services Overview
 
+```mermaid
+graph TD
+  kgcms[KG CMS] --rdf updates--> sb1[Service Bus topic 1]
+  sb1 --triggers--> epc[event_persistence_consumer]
+  epc --persists message-->sql[Azure SQL Database]
+  sql --triggers--> sdt[SQL Database Trigger]
+  sdt --publishes message--> sb2[Service Bus topic 2]
+  sb2 --triggers--> rdc[RDF Delta Consumer]
+  rdc --rdf patch--> delta[RDF Delta Server]
+  delta --syncs--> fuseki[Fuseki Server]
+```
+
 ### Event Persistence Consumer
 
-Source code: [event_persistence_consumer](event_persistence_consumer)
+Source code: [event_persistence_consumer](./event_persistence_consumer)
 
-A function app service bus consumer.
-
-The consumer consumes events from the `rdf-delta` topic and persists them in the event store in SQL Managed Instance. The service bus subscription is named `event-persistence-consumer`.
+Consumes messages from a service bus topic and persists them an Azure SQL Database.
 
 ### SQL Database Trigger
 
-Source code: [db_trigger](db_trigger)
+Source code: [db_trigger](./db_trigger)
 
-A SQL database function trigger. The function runs when updates are made to the `Event` table in the `rdf_delta` database.
-
-If the `EventPublished` column is set to `FALSE`, the function will publish the event to the `rdf-delta-events` topic in service bus.
+Publishes rows from Azure SQL Database to a service bus topic.
 
 ### RDF Delta Consumer
 
-Source code: [rdf_delta_consumer](rdf_delta_consumer)
+Source code: [rdf_delta_consumer](./rdf_delta_consumer)
 
-A function app service bus consumer.
+Consumes messages from a service bus topic and sends them to RDF Delta Server.
 
-The consumer consumes events from the `rdf-delta-events` topic, processes them, and sends them to the RDF Delta Server or Fuseki SPARQL Update endpoint.
+## Deployment
+
+### Pre-requisites
+
+The Function apps in this repository depend on the following Azure services
+
+- Azure Service Bus
+- Azure SQL Database
+
+These services will need to be deployed and maintained seperately to this repository.
+
+#### Service Bus
+
+The service bus instance will need to have two topics each with a sessionful
+subscription.
+
+#### Azure SQL DB
+
+The Azure SQL instance will need to have change tracking enabled and an event table
+created. It will also need to support Microsoft Entra ID authentication, so that the
+function apps can connect to it using their sysem managed identities.
+
+##### Configuration
+
+Once the SQL Database has been created, use the Query Editor or other SQL DB management
+tool to execute the following SQL statements.
+
+1. Enable change tracking on the databse.
+
+```sql
+IF NOT EXISTS (SELECT * FROM sys.change_tracking_databases WHERE database_id = DB_ID('rdf-delta'))
+BEGIN
+    ALTER DATABASE [rdf-delta]
+    SET CHANGE_TRACKING = ON
+    (CHANGE_RETENTION = 2 DAYS, AUTO_CLEANUP = ON)
+END
+```
+
+2. Create the Event table.
+
+```sql
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Event')
+BEGIN
+    CREATE TABLE Event (
+        EventID BIGINT IDENTITY(1,1) PRIMARY KEY,
+        EventHeader NVARCHAR(4000),
+        EventBody NVARCHAR(MAX),
+        EventPublished BIT DEFAULT 'FALSE'
+    )
+END
+```
+
+3. Enable change tracking on the Event table.
+
+```sql
+IF NOT EXISTS (SELECT * FROM sys.change_tracking_tables WHERE object_id = OBJECT_ID('Event'))
+BEGIN
+    ALTER TABLE [Event]
+    ENABLE CHANGE_TRACKING
+    WITH (TRACK_COLUMNS_UPDATED = ON)
+END
+```
+
+4. Add users to the database (detailed in the
+   [Event Persistence Consumer](./event_persistence_consumer/README.md) and
+   [SQL Database Trigger](./db_trigger/README.md) readme's).
+
+5. Ensure firewall exceptions are in place to allow communication with the Event
+   Persistence Consumer and SQL Database Trigger apps.
 
 ## Local Development
+
+### Dependencies
+
+- Azure functions core tools
+- Python 3.10 and 3.11
+- Microsoft ODBC Driver 17 and 18
+- _Service Bus Emulator_
+- _SQL Server_
+
+You can also use devcontainers to develop against the local equivalent of service bus
+and azure sql db. See below for details. This may be preferable is installing these
+dependencies natively can be tricky.
+
+#### Dev Containers
 
 The recommended way to do development is to use (VS Code with the Dev Container extension)[https://code.visualstudio.com/docs/devcontainers/containers].
 
@@ -43,7 +133,7 @@ Last step before developing, click on the extensions tab to ensure all of the ex
 > [!NOTE]
 > A warning from the Azure extension may appear to complain that it has found multiple function apps in the one project. Just ignore this, we are not using any features from the extension for functions.
 
-### Local SQL Server
+##### Local SQL Server
 
 The local SQL Server is running in a docker container when the dev container starts. An easy way to view the database is to use the `ms-mssql` extension in VS Code. Once installed, you can connect to the local SQL Server by opening the SQL Server view.
 
@@ -54,7 +144,7 @@ SELECT name
 FROM sys.tables
 ```
 
-### sqlcmd
+##### sqlcmd
 
 Alternatively, you can use the `sqlcmd` command to connect to the local SQL Server.
 
