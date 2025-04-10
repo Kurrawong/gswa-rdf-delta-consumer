@@ -112,6 +112,58 @@ Refer to the following readme's for deployment and configuration of each functio
 - [SQL Database Trigger](./db_trigger/README.md)
 - [RDF Delta Consumer](./rdf_delta_consumer/README.md)
 
+## Testing
+
+To test the operation of the function app you can submit a message to the first service
+bus topic with the following parameters:
+
+```
+content_type: text/plain
+metadata: { "https://schema.org/encodingFormat": "application/trig" }
+body:
+  <http://mygraph> {
+    <a> <b> <c> .
+  }
+```
+
+Which using the service bus explorer would look like:
+
+...
+
+To check the flow of the message through the system at different stages:
+
+1. from service bus topic 1 to azure sql db (via the event_persistence_consumer)
+
+   execute the following statement against the azure sql db
+
+   ```sql
+   SELECT TOP (10) * FROM [Event]
+   ```
+
+2. from azure sql db to service bus topic 2 (via the db_trigger)
+
+   use service bus explorer to peak messages on the topic
+
+   > this may not show anything if the message has already been processed of to RDF
+   > Delta server.
+
+   you can also run the sql query from step 1 and check the EventPublished value.
+   if it is true then the message should have been sent off to service bus topic 2.
+
+3. from service bus topic 2 to rdf delta server.
+
+   check the logs for RDF Delta server for incoming patches.
+
+4. from rdf delta server to fuseki server.
+
+   query fuseki server for the data that was sent in the test message using the example
+   at the top, this query would look like:
+
+   ```bash
+   curl https://myfusekiserver/myds/sparql --data 'select * where { graph
+   <http://mygraph> { ?s ?p ?o } }'
+   ```
+
 ## Local Development
 
 ### Dependencies
