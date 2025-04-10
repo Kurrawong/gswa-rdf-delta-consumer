@@ -74,6 +74,10 @@ the azure functions core tools cli.
 Environment variables should be set in the `local.settings.json` file (not kept in
 version control).
 
+> [!IMPORTANT]  
+> You need to set the WEBSITE_SITE_NAME variable in the local.settings.json to run this
+> function app locally. But this setting cannot be pushed to the deployed function app.
+
 Python dependencies are managed with the `requirements.txt` file and can be installed
 with:
 
