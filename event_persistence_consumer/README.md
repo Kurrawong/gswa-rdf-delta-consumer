@@ -24,10 +24,10 @@ This function consumes from a "sessionful" service bus topic, processes a messag
 CREATE USER [<identity-name>] FROM EXTERNAL PROVIDER;
 ALTER ROLE db_datareader ADD MEMBER [<identity-name>];
 ALTER ROLE db_datawriter ADD MEMBER [<identity-name>];
-GRANT VIEW CHANGE TRACKING ON [Event] TO gswasdt;
+GRANT VIEW CHANGE TRACKING ON [Event] TO [<identity-name>];
 ```
 
-> where <identity-name> is the name of the managed identity in Microsoft Entra ID.
+> where \<identity-name> is the name of the managed identity in Microsoft Entra ID.
 > If the identity is system-assigned, the name is always the same as the name of the
 > function app.
 

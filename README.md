@@ -20,7 +20,7 @@ graph TD
 
 Source code: [event_persistence_consumer](./event_persistence_consumer)
 
-Consumes messages from a service bus topic and persists them an Azure SQL Database.
+Consumes messages from a service bus topic and persists them to Azure SQL Database.
 
 ### SQL Database Trigger
 
@@ -64,13 +64,15 @@ tool to execute the following SQL statements.
 1. Enable change tracking on the databse.
 
 ```sql
-IF NOT EXISTS (SELECT * FROM sys.change_tracking_databases WHERE database_id = DB_ID('rdf-delta'))
+IF NOT EXISTS (SELECT * FROM sys.change_tracking_databases WHERE database_id = DB_ID('<database-id>'))
 BEGIN
-    ALTER DATABASE [rdf-delta]
+    ALTER DATABASE [<database-id>]
     SET CHANGE_TRACKING = ON
     (CHANGE_RETENTION = 2 DAYS, AUTO_CLEANUP = ON)
 END
 ```
+
+> where _<database-id>_ is the name of the Azure SQL Database
 
 2. Create the Event table.
 
@@ -103,6 +105,12 @@ END
 
 5. Ensure firewall exceptions are in place to allow communication with the Event
    Persistence Consumer and SQL Database Trigger apps.
+
+Refer to the following readme's for deployment and configuration of each function app
+
+- [Event Persistence Consumer](./event_persistence_consumer/README.md)
+- [SQL Database Trigger](./db_trigger/README.md)
+- [RDF Delta Consumer](./rdf_delta_consumer/README.md)
 
 ## Local Development
 
