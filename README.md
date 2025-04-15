@@ -72,7 +72,7 @@ BEGIN
 END
 ```
 
-> where _<database-id>_ is the name of the Azure SQL Database
+> where _\<database-id>_ is the name of the Azure SQL Database
 
 2. Create the Event table.
 
