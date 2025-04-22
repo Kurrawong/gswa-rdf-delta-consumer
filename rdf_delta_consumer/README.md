@@ -14,7 +14,7 @@ This function consumes from a "sessionful" service bus topic, processes a messag
 
 ### Create the function app
 
-1. Create a function app with the Python 3.11 runtime.
+1. Create a function app with the Python 3.12 runtime.
 
 ### Deploy the code
 

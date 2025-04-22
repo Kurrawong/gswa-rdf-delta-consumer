@@ -13,7 +13,7 @@ This function consumes from a "sessionful" service bus topic, processes a messag
 
 ### Create the function app
 
-1. Create a function app with the Python 3.11 runtime.
+1. Create a function app with the Python 3.12 runtime.
 2. Enable the System Managed Identity for the app.
 
 ### Configure the Azure SQL Database
@@ -46,7 +46,7 @@ the azure functions core tools cli.
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | SERVICE_BUS              | Endpoint=...;SharedAccessKeyName=...;SharedAccessKey=...                                                                    | service bus connection string                                                                                                                                                                                                                    |
 | SERVICE_BUS_TOPIC        | my-topic                                                                                                                    | name of service bus topic to consume from                                                                                                                                                                                                        |
-| SERVICE_BUS_SUBSCRIPTION | my-topic-sub                                                                                                                      | name of service bus subscription to use (must have sessions enabled)                                                                                                                                                                             |
+| SERVICE_BUS_SUBSCRIPTION | my-topic-sub                                                                                                                | name of service bus subscription to use (must have sessions enabled)                                                                                                                                                                             |
 | SqlConnectionString      | Driver={ODBC Driver 18 for SQL Server};Server=...;Database=...;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30; | Azure SQL connection string. Driver must be specified and Authentication must not be specified. The function code will automatically acquire a token for the apps system managed identity and use that for authentication to Azure SQL Database. |
 
 ## Development

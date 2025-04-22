@@ -170,7 +170,7 @@ To check the flow of the message through the system at different stages:
 ### Dependencies
 
 - Azure functions core tools
-- Python 3.10 and 3.11
+- Python 3.10 and 3.12
 - Microsoft ODBC Driver 17 and 18
 - _Service Bus Emulator_
 - _SQL Server_
