@@ -1,7 +1,7 @@
 trigger: none
  
 variables:
-  functionAppName: 'gswaepcas'
+  functionAppName: 'gswaepc'
   resourceGroupName: 'GSWA'
   serviceConnection: 'devops_uami'
   workingDirectory: '$(System.DefaultWorkingDirectory)/event_persistence_consumer'
