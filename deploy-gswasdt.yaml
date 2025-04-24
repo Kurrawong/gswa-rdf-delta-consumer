@@ -1,3 +1,5 @@
+name: deploy-sdt
+
 trigger: none
  
 variables:
