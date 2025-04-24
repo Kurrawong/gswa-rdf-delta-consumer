@@ -30,7 +30,7 @@ stages:
         includeRootFolder: false
         rootFolderOrFile: $(workingDirectory)
         archiveType: zip
-        archiveFile: $(Build.ArtifactStagingDirectory)/eventpercons.zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/drop.zip
         replaceExistingArchive: true
  
  
@@ -46,7 +46,7 @@ stages:
         azureSubscription: ${{ variables.serviceConnection }}
         appType: functionAppLinux
         appName: ${{ variables.functionAppName }}
-        package: '$(System.ArtifactsDirectory)/drop/eventpercons.zip'
+        package: '$(System.ArtifactsDirectory)/drop/drop.zip'
         deployToSlotOrASE: true  
         resourceGroupName: ${{ variables.resourceGroupName }}
         deploymentMethod: 'zipDeploy'

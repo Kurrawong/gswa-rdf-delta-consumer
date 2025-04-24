@@ -1,10 +1,10 @@
 trigger: none
  
 variables:
-  functionAppName: 'gswasdt'
+  functionAppName: 'gswardc'
   resourceGroupName: 'GSWA'
   serviceConnection: 'devops_uami'
-  workingDirectory: '$(System.DefaultWorkingDirectory)/db_trigger'
+  workingDirectory: '$(System.DefaultWorkingDirectory)/rdf_delta_consumer'
   myDestinationFolder: '$(System.ArtifactsDirectory)'
  
 stages:
