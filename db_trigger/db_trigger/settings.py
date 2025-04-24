@@ -19,6 +19,8 @@ def get_odbc_conn_str(conn_str: str) -> str:
         odbc_driver_string = "Driver={ODBC Driver 17 for SQL Server}"
     elif py_version == "3.11":
         odbc_driver_string = "Driver={ODBC Driver 18 for SQL Server}"
+    elif py_version == "3.12":
+        odbc_driver_string = "Driver={ODBC Driver 18 for SQL Server}"
     else:
         raise Exception(f"odbc driver selection not implemented for python {py_version}")
 
