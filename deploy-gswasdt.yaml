@@ -1,10 +1,10 @@
 trigger: none
  
 variables:
-  functionAppName: 'gswaepc'
+  functionAppName: 'gswasdt'
   resourceGroupName: 'GSWA'
   serviceConnection: 'devops_uami'
-  workingDirectory: '$(System.DefaultWorkingDirectory)/event_persistence_consumer'
+  workingDirectory: '$(System.DefaultWorkingDirectory)/db_trigger'
   myDestinationFolder: '$(System.ArtifactsDirectory)'
  
 stages:
