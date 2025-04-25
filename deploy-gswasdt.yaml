@@ -1,0 +1,52 @@
+trigger: none
+ 
+variables:
+  functionAppName: 'gswasdt'
+  resourceGroupName: 'GSWA'
+  serviceConnection: 'devops_uami'
+  workingDirectory: '$(System.DefaultWorkingDirectory)/db_trigger'
+  myDestinationFolder: '$(System.ArtifactsDirectory)'
+ 
+stages:
+- stage: Build
+  displayName: Build Stage
+ 
+  jobs:
+  - job: Build
+    displayName: Build App
+    pool:
+      vmImage: 'ubuntu-latest'
+ 
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: 3.12
+    - bash: |
+        pip install --target="./.python_packages/lib/site-packages" -r ./requirements.txt
+      workingDirectory: $(workingDirectory)
+      
+    - task: ArchiveFiles@2
+      inputs:
+        includeRootFolder: false
+        rootFolderOrFile: $(workingDirectory)
+        archiveType: zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/drop.zip
+        replaceExistingArchive: true
+ 
+ 
+    - task: PublishBuildArtifacts@1
+
+    - task: DownloadBuildArtifacts@1
+      inputs:
+        artifactName: drop
+
+    - task: AzureFunctionApp@2
+      displayName: Deploy Function App
+      inputs:
+        azureSubscription: ${{ variables.serviceConnection }}
+        appType: functionAppLinux
+        appName: ${{ variables.functionAppName }}
+        package: '$(System.ArtifactsDirectory)/drop/drop.zip'
+        deployToSlotOrASE: true  
+        resourceGroupName: ${{ variables.resourceGroupName }}
+        deploymentMethod: 'zipDeploy'

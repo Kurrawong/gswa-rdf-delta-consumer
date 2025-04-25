@@ -15,11 +15,6 @@ The function app is triggered by change events coming from the database table. A
 change tracking must be enabled on the database and table to support triggering of this
 function.
 
-> [!IMPORTANT]  
-> The [Azure SQL trigger](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-azure-sql-trigger?tabs=isolated-process%2Cpython-v2%2Cportal&pivots=programming-language-python)
-> is [not supported by the Flex Consumption plan](https://learn.microsoft.com/en-us/azure/azure-functions/flex-consumption-plan#considerations),
-> and is only available under the **Python 3.10 runtime**.
-
 Instructions for creating and configuring the Azure SQL Database table are given below.
 
 ## Deployment
@@ -31,7 +26,7 @@ Instructions for creating and configuring the Azure SQL Database table are given
 
 ### Create the function app
 
-1. Create a function app with the Python 3.10 runtime and not the Flex Consumption
+1. Create a function app with the Python 3.12 runtime and not the Flex Consumption
    hosting plan
 2. Enable the System Managed Identity for the app.
 
