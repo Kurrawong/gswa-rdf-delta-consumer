@@ -29,8 +29,6 @@ the azure functions core tools cli.
 
 | variable                       | example value                                            | description                                                   |
 | ------------------------------ | -------------------------------------------------------- | ------------------------------------------------------------- |
-| SCM_DO_BUILD_DURING_DEPLOYMENT | true                                                     | enable remote builds                                          |
-| ENABLE_ORYX_BUILD              | true                                                     | use oryx for remote build                                     |
 | SERVICE_BUS                    | Endpoint=...;SharedAccessKeyName=...;SharedAccessKey=... | service bus connection string                                 |
 | SERVICE_BUS_TOPIC              | my-second-topic                                          | name of service bus topic to consume from                     |
 | SERVICE_BUS_SUBSCRIPTION       | my-second-topic-sub                                      | name of service bus subscription (must have sessions enabled) |
