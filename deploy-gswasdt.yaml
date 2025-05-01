@@ -7,31 +7,28 @@ variables:
   workingDirectory: '$(System.DefaultWorkingDirectory)/db_trigger'
  
 stages:
-- stage: Build_and_Deploy
-  displayName: Build and Deploy Stage
- 
+- stage: Deploy
+
   jobs:
-  - job: zipdeploy
-    displayName: Build App
-    pool:
-      vmImage: 'ubuntu-latest'
+    - job: zipdeploy
+      pool:
+        vmImage: 'ubuntu-latest'
 
-    steps:
-      - task: ArchiveFiles@2
-        inputs:
-          includeRootFolder: false
-          rootFolderOrFile: $(workingDirectory)
-          archiveType: zip
-          archiveFile: $(Build.ArtifactStagingDirectory)/app.zip
-          replaceExistingArchive: true
+      steps:
+        - task: ArchiveFiles@2
+          inputs:
+            includeRootFolder: false
+            rootFolderOrFile: $(workingDirectory)
+            archiveType: zip
+            archiveFile: $(Build.ArtifactStagingDirectory)/app.zip
+            replaceExistingArchive: true
 
-      - task: AzureFunctionApp@2
-        displayName: Deploy Function App
-        inputs:
-          azureSubscription: ${{ variables.serviceConnection }}
-          appType: functionAppLinux
-          appName: ${{ variables.functionAppName }}
-          package: $(Build.ArtifactStagingDirectory)/app.zip
-          deployToSlotOrASE: true  
-          resourceGroupName: ${{ variables.resourceGroupName }}
-          deploymentMethod: 'zipDeploy'
+        - task: AzureFunctionApp@2
+          inputs:
+            azureSubscription: ${{ variables.serviceConnection }}
+            appType: functionAppLinux
+            appName: ${{ variables.functionAppName }}
+            package: $(Build.ArtifactStagingDirectory)/app.zip
+            deployToSlotOrASE: true  
+            resourceGroupName: ${{ variables.resourceGroupName }}
+            deploymentMethod: 'zipDeploy'

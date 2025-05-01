@@ -1,52 +1,34 @@
 trigger: none
  
 variables:
-  functionAppName: 'gswaepc'
-  resourceGroupName: 'GSWA'
   serviceConnection: 'devops_uami'
+  resourceGroupName: 'GSWA'
+  functionAppName: 'gswaepc'
   workingDirectory: '$(System.DefaultWorkingDirectory)/event_persistence_consumer'
-  myDestinationFolder: '$(System.ArtifactsDirectory)'
  
 stages:
-- stage: Build
-  displayName: Build Stage
- 
+- stage: Deploy
+
   jobs:
-  - job: Build
-    displayName: Build App
-    pool:
-      vmImage: 'ubuntu-latest'
- 
-    steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: 3.12
-    - bash: |
-        pip install --target="./.python_packages/lib/site-packages" -r ./requirements.txt
-      workingDirectory: $(workingDirectory)
-      
-    - task: ArchiveFiles@2
-      inputs:
-        includeRootFolder: false
-        rootFolderOrFile: $(workingDirectory)
-        archiveType: zip
-        archiveFile: $(Build.ArtifactStagingDirectory)/drop.zip
-        replaceExistingArchive: true
- 
- 
-    - task: PublishBuildArtifacts@1
+    - job: zipdeploy
+      pool:
+        vmImage: 'ubuntu-latest'
 
-    - task: DownloadBuildArtifacts@1
-      inputs:
-        artifactName: drop
+      steps:
+        - task: ArchiveFiles@2
+          inputs:
+            includeRootFolder: false
+            rootFolderOrFile: $(workingDirectory)
+            archiveType: zip
+            archiveFile: $(Build.ArtifactStagingDirectory)/app.zip
+            replaceExistingArchive: true
 
-    - task: AzureFunctionApp@2
-      displayName: Deploy Function App
-      inputs:
-        azureSubscription: ${{ variables.serviceConnection }}
-        appType: functionAppLinux
-        appName: ${{ variables.functionAppName }}
-        package: '$(System.ArtifactsDirectory)/drop/drop.zip'
-        deployToSlotOrASE: true  
-        resourceGroupName: ${{ variables.resourceGroupName }}
-        deploymentMethod: 'zipDeploy'
+        - task: AzureFunctionApp@2
+          inputs:
+            azureSubscription: ${{ variables.serviceConnection }}
+            appType: functionAppLinux
+            appName: ${{ variables.functionAppName }}
+            package: $(Build.ArtifactStagingDirectory)/app.zip
+            deployToSlotOrASE: true  
+            resourceGroupName: ${{ variables.resourceGroupName }}
+            deploymentMethod: 'zipDeploy'
