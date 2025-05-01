@@ -8,23 +8,15 @@ variables:
   myDestinationFolder: '$(System.ArtifactsDirectory)'
  
 stages:
-- stage: Build
-  displayName: Build Stage
+- stage: Build and Deploy
+  displayName: Build and Deploy Stage
  
   jobs:
-  - job: Build
+  - job: zipdeploy
     displayName: Build App
     pool:
       vmImage: 'ubuntu-latest'
- 
-    steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: 3.12
-    - bash: |
-        pip install --target="./.python_packages/lib/site-packages" -r ./requirements.txt
-      workingDirectory: $(workingDirectory)
-      
+
     - task: ArchiveFiles@2
       inputs:
         includeRootFolder: false
