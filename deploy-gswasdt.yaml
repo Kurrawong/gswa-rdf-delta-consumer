@@ -1,11 +1,10 @@
 trigger: none
  
 variables:
-  functionAppName: 'gswasdt'
-  resourceGroupName: 'GSWA'
   serviceConnection: 'devops_uami'
+  resourceGroupName: 'GSWA'
+  functionAppName: 'gswasdt'
   workingDirectory: '$(System.DefaultWorkingDirectory)/db_trigger'
-  myDestinationFolder: '$(System.ArtifactsDirectory)'
  
 stages:
 - stage: Build_and_Deploy
@@ -23,15 +22,8 @@ stages:
           includeRootFolder: false
           rootFolderOrFile: $(workingDirectory)
           archiveType: zip
-          archiveFile: $(Build.ArtifactStagingDirectory)/drop.zip
+          archiveFile: $(Build.ArtifactStagingDirectory)/app.zip
           replaceExistingArchive: true
-   
-   
-      - task: PublishBuildArtifacts@1
-
-      - task: DownloadBuildArtifacts@1
-        inputs:
-          artifactName: drop
 
       - task: AzureFunctionApp@2
         displayName: Deploy Function App
@@ -39,7 +31,7 @@ stages:
           azureSubscription: ${{ variables.serviceConnection }}
           appType: functionAppLinux
           appName: ${{ variables.functionAppName }}
-          package: '$(System.ArtifactsDirectory)/drop/drop.zip'
+          package: $(Build.ArtifactStagingDirectory)/app.zip
           deployToSlotOrASE: true  
           resourceGroupName: ${{ variables.resourceGroupName }}
           deploymentMethod: 'zipDeploy'
