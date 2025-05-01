@@ -17,28 +17,29 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
 
-    - task: ArchiveFiles@2
-      inputs:
-        includeRootFolder: false
-        rootFolderOrFile: $(workingDirectory)
-        archiveType: zip
-        archiveFile: $(Build.ArtifactStagingDirectory)/drop.zip
-        replaceExistingArchive: true
- 
- 
-    - task: PublishBuildArtifacts@1
+    steps:
+      - task: ArchiveFiles@2
+        inputs:
+          includeRootFolder: false
+          rootFolderOrFile: $(workingDirectory)
+          archiveType: zip
+          archiveFile: $(Build.ArtifactStagingDirectory)/drop.zip
+          replaceExistingArchive: true
+   
+   
+      - task: PublishBuildArtifacts@1
 
-    - task: DownloadBuildArtifacts@1
-      inputs:
-        artifactName: drop
+      - task: DownloadBuildArtifacts@1
+        inputs:
+          artifactName: drop
 
-    - task: AzureFunctionApp@2
-      displayName: Deploy Function App
-      inputs:
-        azureSubscription: ${{ variables.serviceConnection }}
-        appType: functionAppLinux
-        appName: ${{ variables.functionAppName }}
-        package: '$(System.ArtifactsDirectory)/drop/drop.zip'
-        deployToSlotOrASE: true  
-        resourceGroupName: ${{ variables.resourceGroupName }}
-        deploymentMethod: 'zipDeploy'
+      - task: AzureFunctionApp@2
+        displayName: Deploy Function App
+        inputs:
+          azureSubscription: ${{ variables.serviceConnection }}
+          appType: functionAppLinux
+          appName: ${{ variables.functionAppName }}
+          package: '$(System.ArtifactsDirectory)/drop/drop.zip'
+          deployToSlotOrASE: true  
+          resourceGroupName: ${{ variables.resourceGroupName }}
+          deploymentMethod: 'zipDeploy'
