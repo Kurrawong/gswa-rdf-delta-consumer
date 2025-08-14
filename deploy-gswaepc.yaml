@@ -2,8 +2,8 @@ trigger: none
  
 variables:
   serviceConnection: 'devops_uami'
-  resourceGroupName: 'GSWA'
-  functionAppName: 'gswaepc'
+  resourceGroupName: 'default'
+  functionAppName: 'gswadev-epc'
   workingDirectory: '$(System.DefaultWorkingDirectory)/event_persistence_consumer'
  
 stages:

@@ -2,8 +2,8 @@ trigger: none
  
 variables:
   serviceConnection: 'devops_uami'
-  resourceGroupName: 'GSWA'
-  functionAppName: 'gswardc'
+  resourceGroupName: 'default'
+  functionAppName: 'gswadev-rdc'
   workingDirectory: '$(System.DefaultWorkingDirectory)/rdf_delta_consumer'
  
 stages:
