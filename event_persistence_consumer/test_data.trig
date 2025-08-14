@@ -1,0 +1,5 @@
+@prefix ex: <https://example.org/> .
+
+ex:graph {
+  ex:a ex:b ex:c .
+}
