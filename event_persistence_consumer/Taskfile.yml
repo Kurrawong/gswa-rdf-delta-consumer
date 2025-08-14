@@ -2,6 +2,8 @@
 
 version: "3"
 
+dotenv: [".env"]
+
 tasks:
   default:
     cmd: task -a
@@ -16,7 +18,6 @@ tasks:
   install:
     desc: Set up the venv and install python dependencies
     cmds:
-      - task: clean
       - .venv/bin/pip install -r requirements.txt
       - .venv/bin/pip install -r requirements-dev.txt
 
@@ -28,20 +29,17 @@ tasks:
 
   dev:
     desc: Run the function app in dev mode
-    cmds:
-      - func start -p 7072
+    cmd: func start -p 7072
 
   test:
     desc: Run the tests
     cmd: .venv/bin/pytest
 
-  load:
-    desc: Load the data into the database
+  sendPatchToServiceBus:
+    desc: send a patch to remote service bus instance
     cmds:
-      - .venv/bin/python sb_producer.py rdf-delta main users.trig --ws
-      - .venv/bin/python sb_producer.py rdf-delta main catalogs.trig --ws
+      - .venv/bin/python sb_producer.py input default test_data.trig --ws
 
   deploy:
     desc: Deploy the function app to azure
-    cmds:
-      - func azure functionapp publish gswa-epc
+    cmd: func azure functionapp publish ${EPC_APP_NAME}
