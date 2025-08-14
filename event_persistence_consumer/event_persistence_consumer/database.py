@@ -4,7 +4,8 @@ from contextlib import ContextDecorator, contextmanager
 from typing import Iterator
 from azure import identity
 
-import pyodbc, struct
+import pyodbc
+import struct
 
 logger = logging.getLogger(__name__)
 
