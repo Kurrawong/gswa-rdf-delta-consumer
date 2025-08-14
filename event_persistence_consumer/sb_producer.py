@@ -15,7 +15,7 @@ try:
 except ModuleNotFoundError:
     pass
 
-conn_str = os.getenv("SERVICE_BUS")
+conn_str = os.getenv("SERVICE_BUS_CONNECTION_STRING")
 
 SUPPORTED_FORMATS = ["application/rdf-patch", "text/turtle", "application/trig"]
 path = pathlib.Path(__file__).parent.absolute()
