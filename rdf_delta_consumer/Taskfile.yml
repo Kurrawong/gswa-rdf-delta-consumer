@@ -2,6 +2,8 @@
 
 version: "3"
 
+dotenv: [".env"]
+
 tasks:
   default:
     cmd: task -a
@@ -30,3 +32,8 @@ tasks:
     desc: Run in dev mode
     cmds:
       - func start -p 7073
+
+  deploy:
+    desc: Push code to azure using core tools cli
+    cmd: func azure functionapp publish ${RDC_APP_NAME}
+
