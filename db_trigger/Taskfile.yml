@@ -2,6 +2,8 @@
 
 version: "3"
 
+dotenv: [".env"]
+
 tasks:
   default:
     cmd: task -a
@@ -38,4 +40,4 @@ tasks:
   deploy:
     desc: Deploy the function app to azure
     cmds:
-      - func azure functionapp publish gswa-dbtrigger
+      - func azure functionapp publish ${SDT_APP_NAME}
