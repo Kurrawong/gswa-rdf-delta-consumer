@@ -1,7 +1,7 @@
 trigger: none
  
 variables:
-  serviceConnection: 'devops_uami'
+  serviceConnection: 'GSWA-default'
   resourceGroupName: 'default'
   functionAppName: 'gswadev-sdt'
   workingDirectory: '$(System.DefaultWorkingDirectory)/db_trigger'
