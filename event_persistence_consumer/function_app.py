@@ -49,7 +49,7 @@ def servicebus_topic_trigger(message: func.ServiceBusMessage):
     )
     try:
         with Database(settings.sql_connection_string) as db:
-            table = EventTable(db.connection)
+            table = EventTable(db.connection, settings.sql_table)
             table.insert(
                 message.application_properties,
                 message.get_body().decode("utf-8"),

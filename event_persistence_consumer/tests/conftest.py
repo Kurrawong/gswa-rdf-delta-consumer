@@ -39,7 +39,7 @@ def database(request: pytest.FixtureRequest, master_connection: pyodbc.Connectio
     _database = Database(
         settings.sql_connection_string,
     )
-    create_event_table_if_not_exists(_database.connection)
+    create_event_table_if_not_exists(_database.connection, "Event")
     enable_table_change_tracking(_database.connection, "Event")
 
     def cleanup():

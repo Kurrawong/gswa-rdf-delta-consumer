@@ -12,7 +12,7 @@ app = func.FunctionApp()
 @app.function_name(name="EventTrigger")
 @app.sql_trigger(
     arg_name="event",
-    table_name="Event",
+    table_name=settings.sql_table,
     connection_string_setting="SqlConnectionString",
 )
 async def event_trigger(event: str) -> None:
@@ -47,7 +47,7 @@ async def event_trigger(event: str) -> None:
                     logging.info("Sql connection string: %s",
                                  settings.sql_connection_string_odbc)
                     with Database(settings.sql_connection_string_odbc) as db:
-                        table = EventTable(db.connection)
+                        table = EventTable(db.connection, settings.sql_table)
                         row_id = int(row["Item"]["EventID"])
                         logging.info(f"Marking event {row_id} as published")
                         table.mark_as_published(row_id)

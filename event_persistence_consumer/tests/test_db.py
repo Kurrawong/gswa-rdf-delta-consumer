@@ -18,7 +18,7 @@ def test_database_class(database):
 
 
 def test_event_table_class(database):
-    EventTable(database.connection)
+    EventTable(database.connection, "Event")
     tables = get_tables(database.connection)
     assert "Event" in tables
 
@@ -26,7 +26,7 @@ def test_event_table_class(database):
 def test_event_table_insert(database):
     insert_header = {"foo": "bar"}
     insert_body = "baz"
-    table = EventTable(database.connection)
+    table = EventTable(database.connection, "Event")
     table.insert(insert_header, insert_body)
 
     event_id, event_header, event_body, event_published = table.get(1)
@@ -42,13 +42,13 @@ def test_event_table_insert(database):
 
 
 def test_event_table_get_not_exist_row(database):
-    table = EventTable(database.connection)
+    table = EventTable(database.connection, "Event")
     with pytest.raises(ValueError):
         table.get(1)
 
 
 def test_event_table_get_unpublished_events(database):
-    table = EventTable(database.connection)
+    table = EventTable(database.connection, "Event")
     table.insert({"foo": "bar"}, "baz")
     table.insert({"foo": "bar"}, "baz")
     table.insert({"foo": "bar"}, "baz")
@@ -69,7 +69,7 @@ def test_enable_database_change_tracking(database):
 
 def test_enable_table_change_tracking(database):
     # Create the event table, which enables change tracking in the constructor.
-    EventTable(database.connection)
+    EventTable(database.connection, "Event")
     with database.connection.cursor() as cursor:
         cursor.execute(
             "SELECT * FROM sys.change_tracking_tables WHERE object_id = OBJECT_ID('Event')"

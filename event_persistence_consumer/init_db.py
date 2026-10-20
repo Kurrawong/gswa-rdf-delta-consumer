@@ -18,8 +18,8 @@ enable_database_change_tracking(connection, db_name)
 _database = Database(
     settings.sql_connection_string,
 )
-create_event_table_if_not_exists(_database.connection)
-enable_table_change_tracking(_database.connection, "Event")
+create_event_table_if_not_exists(_database.connection, settings.sql_table)
+enable_table_change_tracking(_database.connection, settings.sql_table)
 
 _database.close()
 connection.close()

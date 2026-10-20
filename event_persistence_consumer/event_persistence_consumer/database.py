@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from contextlib import ContextDecorator, contextmanager
 from typing import Iterator
 from azure import identity
@@ -8,6 +9,23 @@ import pyodbc
 import struct
 
 logger = logging.getLogger(__name__)
+
+
+_identifier_pattern = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def quote_table_name(table: str) -> str:
+    """Validate and bracket-quote a table name, optionally schema-qualified.
+
+    Table names cannot be passed as query parameters, so they are validated
+    here before being interpolated into SQL.
+
+    :raises ValueError: If the table name is not a valid identifier.
+    """
+    parts = table.split(".")
+    if len(parts) > 2 or not all(_identifier_pattern.match(p) for p in parts):
+        raise ValueError(f"Invalid table name: {table!r}")
+    return ".".join(f"[{p}]" for p in parts)
 
 
 @contextmanager
@@ -104,14 +122,16 @@ def get_tables(connection: pyodbc.Connection) -> list[str]:
         return [row.name for row in rows]
 
 
-def create_event_table_if_not_exists(connection: pyodbc.Connection) -> None:
-    """Create the Event table if not exists."""
+def create_event_table_if_not_exists(
+    connection: pyodbc.Connection, table: str
+) -> None:
+    """Create the event table if not exists."""
     with connection.cursor() as cursor:
         cursor.execute(
-            """
-            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Event')
+            f"""
+            IF OBJECT_ID('{table}', 'U') IS NULL
             BEGIN
-                CREATE TABLE Event (
+                CREATE TABLE {quote_table_name(table)} (
                     EventID BIGINT IDENTITY(1,1) PRIMARY KEY,
                     EventHeader NVARCHAR(4000),
                     EventBody NVARCHAR(MAX),
@@ -148,7 +168,7 @@ def enable_table_change_tracking(connection: pyodbc.Connection, table: str) -> N
             f"""
             IF NOT EXISTS (SELECT * FROM sys.change_tracking_tables WHERE object_id = OBJECT_ID('{table}'))
             BEGIN
-                ALTER TABLE {table}
+                ALTER TABLE {quote_table_name(table)}
                 ENABLE CHANGE_TRACKING
                 WITH (TRACK_COLUMNS_UPDATED = ON)
             END
@@ -159,14 +179,15 @@ def enable_table_change_tracking(connection: pyodbc.Connection, table: str) -> N
 class EventTable:
     """The event table over a db connection."""
 
-    def __init__(self, connection: pyodbc.Connection) -> None:
+    def __init__(self, connection: pyodbc.Connection, table: str) -> None:
         self.connection = connection
+        self.table = quote_table_name(table)
 
     def insert(self, header: dict, body: str) -> None:
         with self.connection.cursor() as cursor:
             cursor.execute(
-                """
-                INSERT INTO Event (EventHeader, EventBody)
+                f"""
+                INSERT INTO {self.table} (EventHeader, EventBody)
                 VALUES (?, ?)
             """,
                 json.dumps(header),
@@ -180,9 +201,9 @@ class EventTable:
         """
         with self.connection.cursor() as cursor:
             cursor.execute(
-                """
+                f"""
                 SELECT EventID, EventHeader, EventBody, EventPublished
-                FROM Event
+                FROM {self.table}
                 WHERE EventID = ?
             """,
                 event_id,
@@ -201,8 +222,8 @@ class EventTable:
         """Mark an event as published."""
         with self.connection.cursor() as cursor:
             cursor.execute(
-                """
-                UPDATE Event
+                f"""
+                UPDATE {self.table}
                 SET EventPublished = 'TRUE'
                 WHERE EventID = ?
             """,
@@ -213,7 +234,7 @@ class EventTable:
         """Mark all events with an EventID greater than the given event ID as unpublished."""
         with self.connection.cursor() as cursor:
             cursor.execute(
-                "UPDATE Event SET EventPublished = 'FALSE' WHERE EventID > ?",
+                f"UPDATE {self.table} SET EventPublished = 'FALSE' WHERE EventID > ?",
                 from_event_id,
             )
 
@@ -221,9 +242,9 @@ class EventTable:
         """Get a list of all unpublished events sorted by EventID."""
         with self.connection.cursor() as cursor:
             cursor.execute(
-                """
+                f"""
                 SELECT EventID, EventHeader, EventBody
-                FROM Event
+                FROM {self.table}
                 WHERE EventPublished = 'FALSE'
                 ORDER BY EventID
             """

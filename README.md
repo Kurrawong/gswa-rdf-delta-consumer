@@ -76,6 +76,11 @@ END
 
 2. Create the Event table.
 
+> The table name is configurable on the function apps via the `SQL_TABLE` env var,
+> which is required on both apps. To run separate pipelines (e.g. public and private) against the
+> same database, create one table per pipeline (repeat steps 2 and 3 with the
+> table name substituted) and set `SQL_TABLE` accordingly on each pair of apps.
+
 ```sql
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Event')
 BEGIN

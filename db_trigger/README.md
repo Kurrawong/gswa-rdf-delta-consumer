@@ -2,7 +2,7 @@
 
 ## Overview
 
-This function app publishes rows from an Azure SQL database table called `Event`
+This function app publishes rows from an Azure SQL database table (set with the required `SQL_TABLE` env var)
 to a service bus topic.
 
 The `Event` table is populated with messages from the `event persistence consumer`
@@ -39,10 +39,10 @@ CREATE USER [<identity-name>] FROM EXTERNAL PROVIDER;
 ALTER ROLE db_datareader ADD MEMBER [<identity-name>];
 ALTER ROLE db_datawriter ADD MEMBER [<identity-name>];
 ALTER ROLE db_ddladmin ADD MEMBER [<identity-name>];
-GRANT VIEW CHANGE TRACKING ON [Event] TO [<identity-name>];
+GRANT VIEW CHANGE TRACKING ON [<table-name>] TO [<identity-name>];
 ```
 
-> where \<identity-name> is the name of the managed identity in Microsoft Entra ID.
+> where \<table-name> is the value of `SQL_TABLE` and \<identity-name> is the name of the managed identity in Microsoft Entra ID.
 > If the identity is system-assigned, the name is always the same as the name of the
 > function app.
 
@@ -62,6 +62,7 @@ the azure functions core tools cli.
 | SERVICE_BUS                    | Endpoint=...;SharedAccessKeyName=...;SharedAccessKey=...;                                                                   | service bus connection string                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | SERVICE_BUS_TOPIC              | my-second-topic                                                                                                             | name of service bus topic to publish events to                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | SERVICE_BUS_SESSION_ID         | main                                                                                                                        | service bus session identifier. needs to be the same value as set in KG CMS                                                                                                                                                                                                                                                                                                                                                                                                  |
+| SQL_TABLE                      | Event                                                                                                                       | name of the event table to watch for changes and mark events as published in. Optionally schema-qualified (e.g. `dbo.EventPublic`). **Required, no default** (the app fails to start if unset) so that separate instances can't write to the same table by accident. Use a different table per instance to run separate (e.g. public/private) pipelines against the same database.                                                                                                                                                                                         |
 | USE_AMQP_OVER_WS               | true                                                                                                                        | whether to use amqp over websockets for the service bus connection                                                                                                                                                                                                                                                                                                                                                                                                           |
 | SqlConnectionString            | Server=...;Database=...;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;Authentication=Active Directory Default | connection string for Azure SQL Database, `Authentication=Active Directory Default` will use the system managed identity of the function app to authenticate to the Azure SQL Database. **Note that the structure of this connection string is different to the one used in the event persistence consumer** (this is because the connection string is handled by the function app trigger and not the function app code, as is the case for the event persistence consumer) |
 

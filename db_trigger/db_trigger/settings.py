@@ -1,6 +1,7 @@
 import os
 import sys
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from db_trigger.env import env_file
@@ -43,6 +44,8 @@ class Settings(BaseSettings):
     service_bus_topic: str = ""
     service_bus_session_id: str = ""
     use_amqp_over_ws: bool = True
+    # required: no default, so public/private instances can't share a table by accident
+    sql_table: str = Field(min_length=1)
     sql_connection_string_odbc: str = get_odbc_conn_str(os.environ.get("SqlConnectionString"))
 
 
